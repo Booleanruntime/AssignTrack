@@ -39,7 +39,7 @@ const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects }) =>
       alert('Please complete all required fields: title, due date, subject and status.');
       return;
     }
-    
+
     try {
       if (editingTask) {
         const response = await axiosInstance.put(`/api/tasks/${editingTask._id}`, formData, {
@@ -77,16 +77,18 @@ const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects }) =>
         fullWidth
         margin="normal"
       />
-      <label  className="block text-sm font-medium text-gray-700 mt-4 mb-1">Due Date</label>  
+       <label  className="block text-sm font-medium text-gray-700 mt-4 mb-1">Due Date</label>  
+      {/* <InputLabel shrink htmlFor="deadline" className="block text-sm font-medium text-gray-700 mt-4 mb-1">Due Date</InputLabel> */}
       <TextField
         label=""
         type="date"
         value={formData.deadline}
         onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
         fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
+        margin="normal" 
         required
+        InputLabelProps={{ shrink: true }}
+        
       />
 
       <TextField
@@ -121,13 +123,28 @@ const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects }) =>
         ))}
       </TextField>
 
-      {/* <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
-        {editingTask ? 'Update Button' : 'Create Button'}
-      </button> */}
+      <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+        <Button
+          type="submit"
+          variant="contained"
+          fullWidth
+        >
+          {editingTask ? 'Update Assignment' : 'Create Assignment'}
+        </Button>
 
-      <Button type="submit" variant="contained" fullWidth>
-        {editingTask ? 'Update Assignment' : 'Create Assignment'}
-      </Button>
+        {editingTask && (
+          <Button
+            variant="outlined"
+            fullWidth
+            onClick={() => {
+              setEditingTask(null);
+              setFormData(emptyFormData);
+            }}
+          >
+            Cancel
+          </Button>
+        )}
+      </div>
     </form>
   );
 };

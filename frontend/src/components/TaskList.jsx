@@ -1,10 +1,25 @@
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 
+import {
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Chip,
+  Stack
+} from '@mui/material';
+
 const TaskList = ({ tasks, setTasks, setEditingTask }) => {
   const { user } = useAuth();
 
   const handleDelete = async (taskId) => {
+
+    const confirmDelete = window.confirm('Are you sure you want to delete this assignment?');
+    if (!confirmDelete) {
+      return;
+    }
+
     try {
       await axiosInstance.delete(`/api/tasks/${taskId}`, {
         headers: { Authorization: `Bearer ${user.token}` },
@@ -15,28 +30,69 @@ const TaskList = ({ tasks, setTasks, setEditingTask }) => {
     }
   };
 
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Completed':
+        return 'success';
+      case 'In Progress':
+        return 'primary';
+      case 'Overdue':
+        return 'error';
+      default:
+        return 'default';
+    }
+  };
+
   return (
     <div>
       {tasks.map((task) => (
-        <div key={task._id} className="bg-gray-100 p-4 mb-4 rounded shadow">
-          <h2 className="font-bold">{task.title}</h2>
-          <p>{task.description}</p>
-          <p className="text-sm text-gray-500">Deadline: {new Date(task.deadline).toLocaleDateString()}</p>
-          <div className="mt-2">
-            <button
-              onClick={() => setEditingTask(task)}
-              className="mr-2 bg-yellow-500 text-white px-4 py-2 rounded"
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => handleDelete(task._id)}
-              className="bg-red-500 text-white px-4 py-2 rounded"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
+          <Card key={task._id} sx={{ mb: 2 }}>
+
+            <CardContent>
+                <Typography variant="h6">
+                  {task.title}
+                </Typography>
+
+                <Typography variant="body1">
+                  {task.description}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Due date: {new Date(task.deadline).toLocaleDateString()}
+                </Typography>
+                <Typography variant="body2">
+                  Subject: {task.subject?.name || 'No Subject'}
+                </Typography>
+                <Chip
+                    label={task.status}
+                    color={getStatusColor(task.status)}
+                    size="small"
+                    sx={{ mt: 1 }}
+                  />
+               
+            <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => setEditingTask(task)}
+              >
+                Edit
+              </Button>
+
+              <Button
+                variant="outlined"
+                color="error"
+                size="small"
+                onClick={() => handleDelete(task._id)}
+              >
+                Delete
+              </Button>
+            </Stack>
+
+          </CardContent>
+
+          </Card>
+        
       ))}
     </div>
   );
