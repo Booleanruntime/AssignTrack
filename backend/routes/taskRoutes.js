@@ -5,7 +5,7 @@ const { protect } = require('../middleware/authMiddleware');
 
 router.get('/', protect, async (req, res) => {
   try {
-    const tasks = await Task.find({ user: req.user._id });
+    const tasks = await Task.find({ user: req.user._id }).populate('subject');;
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch tasks' });
@@ -14,16 +14,18 @@ router.get('/', protect, async (req, res) => {
 
 router.post('/', protect, async (req, res) => {
   try {
-    const { title, description, deadline } = req.body;
+    const { title, description, deadline, status, subject } = req.body;
 
     const task = await Task.create({
       title,
       description,
       deadline,
+      status,
+      subject,
       user: req.user._id,
     });
-
-    res.status(201).json(task);
+    const populatedTask = await task.populate('subject');
+    res.status(201).json(populatedTask);
   } catch (error) {
     res.status(500).json({ message: 'Failed to save task' });
   }
@@ -31,13 +33,13 @@ router.post('/', protect, async (req, res) => {
 
 router.put('/:id', protect, async (req, res) => {
   try {
-    const { title, description, deadline } = req.body;
+    const { title, description, deadline, status, subject } = req.body;
 
     const task = await Task.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
-      { title, description, deadline },
+      { title, description, deadline, status, subject },
       { new: true, runValidators: true }
-    );
+    ).populate('subject');
 
     if (!task) {
       return res.status(404).json({ message: 'Task not found' });

@@ -11,15 +11,18 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
 app.use('/api/auth', require('./routes/authRoutes'));
-//my addition
-//app.use('/api/tasks', require('./routes/taskRoutes'));
+
 
 const taskRoutes = require('./routes/taskRoutes');
-console.log('taskRoutes type:', typeof taskRoutes);
-console.log('taskRoutes value:', taskRoutes);
+const subjectRoutes = require('./routes/subjectRoutes');
+console.log('subjectRoutes loaded:', typeof subjectRoutes);
+
 
 app.use('/api/tasks', taskRoutes);
+app.use('/api/subjects', subjectRoutes);
+console.log('Subject routes registered');
 
 // Export the app object for testing
 if (require.main === module) {

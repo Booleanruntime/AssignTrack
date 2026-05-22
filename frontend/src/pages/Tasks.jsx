@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 const Tasks = () => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
+  const [subjects, setSubjects] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
 
   useEffect(() => {
@@ -21,7 +22,20 @@ const Tasks = () => {
       }
     };
 
+    const fetchSubjects = async () => {
+      try {
+        const response = await axiosInstance.get('/api/subjects', {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
+        setSubjects(response.data);
+      } catch (error) {
+        alert('Failed to fetch subjects.');
+      }
+    };                            
+
     fetchTasks();
+    fetchSubjects();
+
   }, [user]);
 
   return (
@@ -31,6 +45,7 @@ const Tasks = () => {
         setTasks={setTasks}
         editingTask={editingTask}
         setEditingTask={setEditingTask}
+        subjects={subjects}
       />
       <TaskList tasks={tasks} setTasks={setTasks} setEditingTask={setEditingTask} />
     </div>

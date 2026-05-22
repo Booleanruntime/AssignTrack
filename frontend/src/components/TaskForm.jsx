@@ -1,25 +1,45 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
+import { ASSIGNMENT_STATUSES } from '../constants/assignmentStatuses';
 
-const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask }) => {
+import {
+  Button,
+  TextField,
+  MenuItem,
+  Card,
+  CardContent,
+  Typography
+} from '@mui/material';
+
+
+const emptyFormData = { title: '', description: '', deadline: '', subject: '', status: ASSIGNMENT_STATUSES.NOT_STARTED };
+const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects }) => {
   const { user } = useAuth();
-  const [formData, setFormData] = useState({ title: '', description: '', deadline: '' });
+  const [formData, setFormData] = useState(emptyFormData);
 
   useEffect(() => {
     if (editingTask) {
       setFormData({
         title: editingTask.title,
         description: editingTask.description,
-        deadline: editingTask.deadline,
+        deadline: editingTask.deadline?.slice(0, 10),
+        subject: editingTask.subject?._id || editingTask.subject || '',
+        status: editingTask.status || ASSIGNMENT_STATUSES.NOT_STARTED
       });
     } else {
-      setFormData({ title: '', description: '', deadline: '' });
+      setFormData(emptyFormData);
     }
   }, [editingTask]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formData.title || !formData.deadline || !formData.subject || !formData.status) {
+      alert('Please complete all required fields: title, due date, subject and status.');
+      return;
+    }
+    
     try {
       if (editingTask) {
         const response = await axiosInstance.put(`/api/tasks/${editingTask._id}`, formData, {
@@ -33,7 +53,7 @@ const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask }) => {
         setTasks([...tasks, response.data]);
       }
       setEditingTask(null);
-      setFormData({ title: '', description: '', deadline: '' });
+      setFormData(emptyFormData);
     } catch (error) {
       alert('Failed to save task.');
     }
@@ -42,29 +62,72 @@ const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask }) => {
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded mb-6">
       <h1 className="text-2xl font-bold mb-4">{editingTask ? 'Your Form Name: Edit Operation' : 'Your Form Name: Create Operation'}</h1>
-      <input
-        type="text"
-        placeholder="Title"
+      <TextField
+        label="Assignment Title"
         value={formData.title}
         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-        className="w-full mb-4 p-2 border rounded"
+        fullWidth
+        margin="normal"
+        required
       />
-      <input
-        type="text"
-        placeholder="Description"
+      <TextField
+        label="Description"
         value={formData.description}
         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-        className="w-full mb-4 p-2 border rounded"
+        fullWidth
+        margin="normal"
       />
-      <input
+      <label  className="block text-sm font-medium text-gray-700 mt-4 mb-1">Due Date</label>  
+      <TextField
+        label=""
         type="date"
         value={formData.deadline}
         onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-        className="w-full mb-4 p-2 border rounded"
+        fullWidth
+        margin="normal"
+        InputLabelProps={{ shrink: true }}
+        required
       />
-      <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
+
+      <TextField
+        select
+        label="Subject"
+        value={formData.subject}
+        onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+        fullWidth
+        margin="normal"
+        required
+      >
+        {subjects.map((subject) => (
+          <MenuItem key={subject._id} value={subject._id}>
+            {subject.name}
+          </MenuItem>
+        ))}
+      </TextField>
+
+      <TextField
+        select
+        label="Status"
+        value={formData.status}
+        onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+        fullWidth
+        margin="normal"
+        required
+      >
+        {Object.values(ASSIGNMENT_STATUSES).map((status) => (
+          <MenuItem key={status} value={status}>
+            {status}
+          </MenuItem>
+        ))}
+      </TextField>
+
+      {/* <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
         {editingTask ? 'Update Button' : 'Create Button'}
-      </button>
+      </button> */}
+
+      <Button type="submit" variant="contained" fullWidth>
+        {editingTask ? 'Update Assignment' : 'Create Assignment'}
+      </Button>
     </form>
   );
 };
