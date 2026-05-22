@@ -25,6 +25,7 @@ const Tasks = () => {
   const [editingTask, setEditingTask] = useState(null);
 
   useEffect(() => {
+    if (!user?.token) return;
     const fetchTasks = async () => {
       try {
         const response = await axiosInstance.get('/api/tasks', {
@@ -127,49 +128,6 @@ const Tasks = () => {
     </Select>
   </FormControl>
 </Stack>
-
-    {/* <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
-      <TextField
-        select
-        label="Filter by Status"
-        value={statusFilter}
-        onChange={(e) => setStatusFilter(e.target.value)}
-        sx={{ minWidth: 200 }}
-      >
-        <MenuItem value="all">All Statuses</MenuItem>
-        {Object.values(ASSIGNMENT_STATUSES).map((status) => (
-          <MenuItem key={status} value={status}>
-            {status}
-          </MenuItem>
-        ))}
-      </TextField>
-
-      <TextField
-        select
-        label="Filter by Subject"
-        value={subjectFilter}
-        onChange={(e) => setSubjectFilter(e.target.value)}
-        sx={{ minWidth: 200 }}
-      >
-        <MenuItem value="all">All Subjects</MenuItem>
-        {subjects.map((subject) => (
-          <MenuItem key={subject._id} value={subject._id}>
-            {subject.name}
-          </MenuItem>
-        ))}
-      </TextField>
-
-      <TextField
-        select
-        label="Sort by Due Date"
-        value={sortOrder}
-        onChange={(e) => setSortOrder(e.target.value)}
-        sx={{ minWidth: 200 }}
-      >
-        <MenuItem value="asc">Earliest First</MenuItem>
-        <MenuItem value="desc">Latest First</MenuItem>
-      </TextField>
-  </Stack> */}
 
 
       <TaskList tasks={filteredTasks} setTasks={setTasks} setEditingTask={setEditingTask} />
