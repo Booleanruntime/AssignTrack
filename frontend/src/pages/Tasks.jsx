@@ -6,14 +6,6 @@ import { useAuth } from '../context/AuthContext';
 import AssignmentStats from '../components/AssignmentStats';
 import AssignmentFilters from '../components/AssignmentFilters';
 
-import {
-  TextField,
-  MenuItem,
-  Stack,
-  FormControl,
-  InputLabel,
-  Select
-} from '@mui/material';
 
 const Tasks = () => {
   const { user } = useAuth();
@@ -72,25 +64,25 @@ const Tasks = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <AssignmentStats tasks={tasks} />
+        <AssignmentStats tasks={tasks} />
 
-      <TaskForm
-        tasks={tasks}
-        setTasks={setTasks}
-        editingTask={editingTask}
-        setEditingTask={setEditingTask}
+        <TaskForm
+          tasks={tasks}
+          setTasks={setTasks}
+          editingTask={editingTask}
+          setEditingTask={setEditingTask}
+          subjects={subjects}
+        />
+
+      <AssignmentFilters
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        subjectFilter={subjectFilter}
+        setSubjectFilter={setSubjectFilter}
+        sortOrder={sortOrder}
+        setSortOrder={setSortOrder}
         subjects={subjects}
-      />
-
-    <AssignmentFilters
-      statusFilter={statusFilter}
-      setStatusFilter={setStatusFilter}
-      subjectFilter={subjectFilter}
-      setSubjectFilter={setSubjectFilter}
-      sortOrder={sortOrder}
-      setSortOrder={setSortOrder}
-      subjects={subjects}
-    />  
+      />  
     
       <TaskList tasks={filteredTasks} setTasks={setTasks} setEditingTask={setEditingTask} />
     </div>

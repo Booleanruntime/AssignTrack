@@ -5,15 +5,6 @@ import SubjectForm from '../components/SubjectForm';
 import SubjectList from '../components/SubjectList';
 
 
-import {
-  TextField,
-  Button,
-  Card,
-  CardContent,
-  Typography,
-  Stack
-} from '@mui/material';
-
 
 const Subjects = () => {
       const { user } = useAuth();
