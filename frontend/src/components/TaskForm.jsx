@@ -11,7 +11,7 @@ import {
 
 
 const emptyFormData = { title: '', description: '', deadline: '', subject: '', status: ASSIGNMENT_STATUSES.NOT_STARTED };
-const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects }) => {
+const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects, setShowTaskForm }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState(emptyFormData);
 
@@ -51,6 +51,7 @@ const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects }) =>
       }
       setEditingTask(null);
       setFormData(emptyFormData);
+      setShowTaskForm(false);
     } catch (error) {
       alert('Failed to save task.');
     }
@@ -58,7 +59,7 @@ const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects }) =>
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded mb-6">
-      <h1 className="text-2xl font-bold mb-4">{editingTask ? 'Your Form Name: Edit Operation' : 'Your Form Name: Create Operation'}</h1>
+      <h1 className="text-2xl font-bold mb-4">{editingTask ? 'Edit Assignment' : 'Create Assignment'}</h1>
       <TextField
         label="Assignment Title"
         value={formData.title}
@@ -124,23 +125,25 @@ const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects }) =>
         <Button
           type="submit"
           variant="contained"
+          sx={{ backgroundColor: '#2e67e4', '&:hover': { backgroundColor: '#2457c5' } }}
           fullWidth
         >
           {editingTask ? 'Update Assignment' : 'Create Assignment'}
         </Button>
 
-        {editingTask && (
+       
           <Button
             variant="outlined"
             fullWidth
             onClick={() => {
               setEditingTask(null);
               setFormData(emptyFormData);
+              setShowTaskForm(false);
             }}
           >
             Cancel
           </Button>
-        )}
+        
       </div>
     </form>
   );

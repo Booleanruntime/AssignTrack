@@ -12,8 +12,10 @@ import {
 const AssignmentFilters = ({ statusFilter, setStatusFilter, subjectFilter, setSubjectFilter, sortOrder, setSortOrder, subjects }) => {
 
 return (
-   <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
-  <FormControl sx={{ minWidth: 200 }}>
+   <Stack direction="row" spacing={2} sx={{ width: '100%' }}>
+
+
+  <FormControl sx={{ flex: 1 }}>
     <InputLabel id="status-filter-label">Filter by Status</InputLabel>
     <Select
       labelId="status-filter-label"
@@ -30,7 +32,7 @@ return (
     </Select>
   </FormControl>
 
-  <FormControl sx={{ minWidth: 200 }}>
+  <FormControl sx={{ flex: 1.7 }}>
     <InputLabel id="subject-filter-label">Filter by Subject</InputLabel>
     <Select
       labelId="subject-filter-label"
@@ -47,7 +49,7 @@ return (
     </Select>
   </FormControl>
 
-  <FormControl sx={{ minWidth: 200 }}>
+  <FormControl sx={{ flex: 1 }}>
     <InputLabel id="sort-order-label">Sort by Due Date</InputLabel>
     <Select
       labelId="sort-order-label"
@@ -59,6 +61,8 @@ return (
       <MenuItem value="desc">Latest First</MenuItem>
     </Select>
   </FormControl>
+
+
 </Stack>
 );
 };

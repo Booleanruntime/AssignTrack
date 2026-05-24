@@ -4,7 +4,7 @@ import {
   Card,
   CardContent,
   Typography,
-
+  Stack,
   Chip,
 } from '@mui/material';
 
@@ -25,37 +25,36 @@ const AssignmentStats = ({ tasks}) => {
   };
 
   return (
-    <div>
-          <Card sx={{ mb: 2 }}>
-            <CardContent>
-                {/* <Chip
-                    color='purple'
-                    size="small"
-                    sx={{ mt: 1 }}
-                  /> */}
-                <Typography variant="h6">
-                    Total Assignments: {tasks.length}
-                </Typography>
-          </CardContent>
+  <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+    <Card sx={{ flex: 1.2 }}>
+      <CardContent>
+      <Stack direction="row" spacing={1} alignItems="center">
+        <Typography variant="h6">
+          Total: {tasks.length}
+        </Typography>
+      </Stack>
+    </CardContent>
+    </Card>
 
-            </Card>
-            {Object.values(ASSIGNMENT_STATUSES).map((status) => (
-                <Card key={status} sx={{ mb: 2 }}>
-                    <CardContent>
-                        <Chip
-                            color={getStatusColor(status)}
-                            size="small"
-                            sx={{ mt: 1 }}
-                        />
-                        <Typography variant="h6">
-                            {status}: {tasks.filter((task) => task.status === status).length}
-                        </Typography>
-                </CardContent>
+    {Object.values(ASSIGNMENT_STATUSES).map((status) => (
+      <Card key={status}  sx={{ flex: 1 }}>
+        <CardContent>
+          <Stack direction="row" spacing={1} alignItems="center">
+          <Chip sx={{ flex: 0.2 }}
+            color={getStatusColor(status)}
+            size="small"
+            sx={{ mt: 1 }}
+          />
 
-            </Card>
-            ))}
-    </div>
-  );
+          <Typography variant="h6">
+            {status}: {tasks.filter((task) => task.status === status).length}
+          </Typography>
+          </Stack>
+        </CardContent>
+      </Card>
+    ))}
+  </Stack>
+);
 };
 
 export default AssignmentStats;
