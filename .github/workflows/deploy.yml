@@ -1,0 +1,22 @@
+name: Deployment Test
+
+on:
+  push:
+    branches:
+      - deployment-test
+
+jobs:
+  test-self-hosted-runner:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Confirm runner machine
+        run: |
+          pwd
+          ls
+          hostname
+          node --version
+          npm --version
