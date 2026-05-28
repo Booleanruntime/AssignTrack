@@ -22,23 +22,54 @@ const SubjectList = ({
       {subjects.map((subject) => (
         <Card key={subject._id} sx={{ mb: 2 }}>
           <CardContent>
-            <Typography variant="h6">
-              {subject.name}
-            </Typography>
+            <Stack
+                direction="row"
+                spacing={2}
+                alignItems="center"
+                justifyContent="space-between"
+              >
+              <div style={{ flex: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                {subject.name}
+              </Typography>
+              </div>
 
+          <div style={{ flex: 2 }}>
             {editingSubject?._id === subject._id ? (
-              <>
                 <TextField
                   label="Description"
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
                   fullWidth
-                  margin="normal"
+                  size="small"
                 />
-
-                <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+              ) : (
+                <>
+                  <Typography variant="body2" sx={{ fontWeight: 800, mb: 0.9 }}>
+                      Description
+                    </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 540 }}>
+                  {subject.description || 'No description'}
+                  </Typography>
+                   </>
+              )}
+          </div>
+          <Stack direction="row" spacing={1}>
+                {editingSubject?._id === subject._id ? (
+                  <>
                   <Button
                     variant="contained"
+                      size="small"
+                      sx={{
+                        backgroundColor: '#2e67e4',
+                        '&:hover': { backgroundColor: '#2457c5' },
+                        py: 0,
+                        px: 1,
+                        minHeight: 28,
+                        height: 30,
+                        minWidth: 54,
+                        fontSize: '0.82rem'
+                      }}
                     onClick={() => handleUpdateSubject(subject._id)}
                   >
                     Save
@@ -46,6 +77,15 @@ const SubjectList = ({
 
                   <Button
                     variant="outlined"
+                    size="small"
+                      sx={{
+                        py: 0,
+                        px: 1,
+                        minHeight: 28,
+                        height: 30,
+                        minWidth: 54,
+                        fontSize: '0.82rem'
+                      }}
                     onClick={() => {
                       setEditingSubject(null);
                       setEditDescription('');
@@ -53,32 +93,45 @@ const SubjectList = ({
                   >
                     Cancel
                   </Button>
-                </Stack>
+               
               </>
             ) : (
-              <>
-                <Typography variant="body1">
-                  {subject.description || 'No description'}
-                </Typography>
-
-                <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+              <>              
                   <Button
                     variant="outlined"
+                    size="small"
+                      sx={{
+                        py: 0,
+                        px: 1,
+                        minHeight: 28,
+                        height: 30,
+                        minWidth: 54,
+                        fontSize: '0.82rem'
+                      }}
                     onClick={() => startEditingSubject(subject)}
                   >
                     Edit
-                  </Button>
-
+                  </Button>              
                   <Button
                     variant="outlined"
                     color="error"
+                      size="small"
+                      sx={{
+                        py: 0,
+                        px: 1,
+                        minHeight: 28,
+                        height: 30,
+                        minWidth: 54,
+                        fontSize: '0.82rem'
+                      }}
                     onClick={() => handleDeleteSubject(subject._id)}
                   >
                     Delete
                   </Button>
+                 </>
+                 )}
                 </Stack>
-              </>
-            )}
+              </Stack>            
           </CardContent>
         </Card>
       ))}

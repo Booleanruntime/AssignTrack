@@ -1,22 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
 import SubjectForm from '../components/SubjectForm';
 import SubjectList from '../components/SubjectList';
-
+import { Typography, Button, Box } from '@mui/material';
 
 
 const Subjects = () => {
       const { user } = useAuth();
       const [subjects, setSubjects] = useState([]);
-      const [formData, setFormData] = useState({
-        name: '',
-        description: ''
-        });
-
-        const [editingSubject, setEditingSubject] = useState(null);
-        const [editDescription, setEditDescription] = useState('');
-       
+      const [editingSubject, setEditingSubject] = useState(null);
+      const [editDescription, setEditDescription] = useState('');
+      const [showSubjectForm, setShowSubjectForm] = useState(false);
+      const subjectFormRef = useRef(null);
+        
         useEffect(() => {
              if (!user?.token){     
                 console.log('No user token yet');
@@ -37,27 +34,32 @@ const Subjects = () => {
         fetchSubjects();
         }, [user]);
 
-        const handleCreateSubject = async (e) => {
-            e.preventDefault();
+         const handleDeleteSubject = async (subjectId) => {
+        const confirmDelete = window.confirm(
+                'Are you sure you want to delete this subject?'
+            );
 
-            if (!formData.name) {
-                alert('Subject name is required.');
+            if (!confirmDelete) {
                 return;
             }
 
             try {
-                const response = await axiosInstance.post('/subjects', formData, {
+                await axiosInstance.delete(`/subjects/${subjectId}`, {
                 headers: { Authorization: `Bearer ${user.token}` },
                 });
 
-                setSubjects([...subjects, response.data]);
-                setFormData({ name: '', description: '' });
+                setSubjects(
+                subjects.filter((subject) => subject._id !== subjectId)
+                );
             } catch (error) {
-                alert(error.response?.data?.message || 'Failed to create subject.');
+                alert(
+                error.response?.data?.message ||
+                'Failed to delete subject.'
+                );
             }
         };
 
-        const startEditingSubject = (subject) => {
+const startEditingSubject = (subject) => {
         setEditingSubject(subject);
         setEditDescription(subject.description || '');
         };
@@ -85,50 +87,66 @@ const Subjects = () => {
             }
         };
 
-        const handleDeleteSubject = async (subjectId) => {
-        const confirmDelete = window.confirm(
-                'Are you sure you want to delete this subject?'
-            );
+        
 
-            if (!confirmDelete) {
-                return;
-            }
+        
+        const openSubjectForm = () => {
+            setShowSubjectForm(true);
 
-            try {
-                await axiosInstance.delete(`/api/subjects/${subjectId}`, {
-                headers: { Authorization: `Bearer ${user.token}` },
+            setTimeout(() => {
+                subjectFormRef.current?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
                 });
-
-                setSubjects(
-                subjects.filter((subject) => subject._id !== subjectId)
-                );
-            } catch (error) {
-                alert(
-                error.response?.data?.message ||
-                'Failed to delete subject.'
-                );
-            }
+            }, 100);
         };
 
         return (
-            <div className="container mx-auto p-6">
-            <h1>Subject Management</h1>
-            <SubjectForm
-                formData={formData}
-                setFormData={setFormData}
-                handleCreateSubject={handleCreateSubject}
-            />
-            <SubjectList
-            subjects={subjects}
-            editingSubject={editingSubject}
-            editDescription={editDescription}
-            setEditDescription={setEditDescription}
-            startEditingSubject={startEditingSubject}
-            handleUpdateSubject={handleUpdateSubject}
-            handleDeleteSubject={handleDeleteSubject}
-            setEditingSubject={setEditingSubject}
-            />
-            
+            <div className="max-w-7xl mx-auto p-6">
+                 <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        mb: 3
+                    }}>
+                <Typography  variant="h4" sx={{fontWeight: 700}}>Subject Management</Typography>
+
+                <Button
+                    variant="contained"
+                    sx={{ backgroundColor: '#2e67e4', '&:hover': { backgroundColor: '#2457c5' } }}
+                    onClick={() => {
+                        setEditingSubject(null);
+                        openSubjectForm();
+                    }}
+                >
+                    + Create Subject
+                </Button>  
+                </Box>
+                {showSubjectForm && (
+                    <div ref={subjectFormRef}>
+                        <SubjectForm
+                            subjects={subjects}
+                            setSubjects={setSubjects}
+                            editingSubject={editingSubject}
+                            setEditingSubject={setEditingSubject}
+                            setShowSubjectForm={setShowSubjectForm}
+                        />
+                    </div>
+                )}
+
+                <SubjectList
+                subjects={subjects}
+
+                editingSubject={editingSubject}
+                editDescription={editDescription}
+                setEditDescription={setEditDescription}
+                startEditingSubject={startEditingSubject}
+                handleUpdateSubject={handleUpdateSubject}
+                handleDeleteSubject={handleDeleteSubject}
+                setEditingSubject={setEditingSubject}
+                />
+                
             </div>
         );
       

@@ -14,7 +14,13 @@ const Navbar = () => {
   };
 
 
-
+const navLinkStyle = (path) => ({
+  fontSize: '16px',
+  fontWeight: location.pathname === path ? 700 : 400,
+  color: location.pathname === path ? '#2e67e4' : '#1E293B',
+  textDecoration: location.pathname === path ? 'underline' : 'none',
+  textUnderlineOffset: '4px'
+});
   return (
     // px-6 py-2
     <nav className="bg-white shadow-sm px-6 py-2 flex justify-between items-center">
@@ -36,13 +42,7 @@ const Navbar = () => {
     (<div className="flex items-center gap-6">
       <Link
         to="/tasks"
-        style={{
-          fontSize: '14px',
-          fontWeight: location.pathname === '/tasks' ? 600 : 400,
-          color: location.pathname === '/tasks' ? '#2e67e4' : '#1E293B',
-          textDecoration: location.pathname === '/tasks' ? 'underline' : 'none',
-          textUnderlineOffset: '4px'
-        }}
+        style={navLinkStyle('/tasks')}
       >
         Assignments
       </Link>
@@ -50,10 +50,7 @@ const Navbar = () => {
       {user?.role === 'admin' && (
         <Link
           to="/subjects"
-          style={{
-            fontWeight: location.pathname === '/subjects' ? 700 : 400,
-            color: location.pathname === '/subjects' ? '#2e67e4' : '#1E293B'
-          }}
+          style={navLinkStyle('/subjects')}
         >
           Subjects
         </Link>
@@ -69,13 +66,7 @@ const Navbar = () => {
   <div className="flex items-center gap-3">
   <Link
     to="/profile"
-    style={{
-      fontSize: '16px',
-      fontWeight: location.pathname === '/profile' ? 700 : 400,
-      color: location.pathname === '/profile' ? '#2e67e4' : '#1E293B',
-      textDecoration: location.pathname === '/profile' ? 'underline' : 'none',
-      textUnderlineOffset: '4px'
-    }}
+    style={navLinkStyle('/profile')}
   >
     Profile
   </Link>
@@ -107,10 +98,7 @@ const Navbar = () => {
   )}
 
   {location.pathname !== '/register' && (
-    <Link
-      to="/register"
-      className="bg-green-500 px-4 py-2 rounded hover:bg-green-700"
-    >
+    <Link to="/register">
       Register
     </Link>
   )}

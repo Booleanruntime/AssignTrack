@@ -84,7 +84,7 @@ const Tasks = () => {
             alignItems: 'center',
             mb: 3
           }}>
-      <Typography  variant="h3" sx={{fontWeight: 550}}>
+      <Typography  variant="h4" sx={{fontWeight: 700}}>
         My Assignments
       </Typography>
 
