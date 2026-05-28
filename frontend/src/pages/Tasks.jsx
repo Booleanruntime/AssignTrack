@@ -17,6 +17,7 @@ const Tasks = () => {
   const [sortOrder, setSortOrder] = useState('asc');
   const [editingTask, setEditingTask] = useState(null);
   const [showTaskForm, setShowTaskForm] = useState(false);
+  const [highlightedTaskId, setHighlightedTaskId] = useState(null);
   const taskFormRef = useRef(null);
 
   useEffect(() => {
@@ -111,6 +112,7 @@ const Tasks = () => {
               setEditingTask={setEditingTask}
               subjects={subjects}
               setShowTaskForm={setShowTaskForm}
+              setHighlightedTaskId={setHighlightedTaskId}
             />
           </div>
         )}
@@ -129,12 +131,12 @@ const Tasks = () => {
         </CardContent>
       </Card>
      
-    
       <TaskList tasks={filteredTasks} 
       setTasks={setTasks} 
       setEditingTask={setEditingTask} 
       setShowTaskForm={setShowTaskForm} 
-      openTaskForm={openTaskForm}/>
+      openTaskForm={openTaskForm}
+      highlightedTaskId={highlightedTaskId}/>
     </div>
   );
 };

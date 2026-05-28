@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { ASSIGNMENT_STATUSES } from '../constants/assignmentStatuses';
 
-const TaskList = ({ tasks, setTasks, setEditingTask, openTaskForm  }) => {
+const TaskList = ({ tasks, setTasks, setEditingTask, openTaskForm, highlightedTaskId }) => {
   const { user } = useAuth();
   
 
@@ -51,14 +51,21 @@ const TaskList = ({ tasks, setTasks, setEditingTask, openTaskForm  }) => {
     <div>
       {tasks.map((task) => (
 
-          <Card key={task._id} sx={{ mb: 2 }}>
+          <Card key={task._id} sx={{ mb: 2,
+            border: task._id === highlightedTaskId ? '2px solid #2e67e4' : '1px solid transparent',
+            boxShadow: task._id === highlightedTaskId
+              ? '0 0 0 3px rgba(46, 103, 228, 0.12)'
+              : undefined,
+            transition: 'all 0.3s ease' }}>
 
             <CardContent>
               <Stack
                 direction="row"
                 spacing={2}
-                alignItems="center"
-                justifyContent="space-between"
+                 sx={{
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}
               >
                 <div style={{ flex: 1.5 }}>
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
@@ -67,13 +74,7 @@ const TaskList = ({ tasks, setTasks, setEditingTask, openTaskForm  }) => {
 
                   <Typography
                     variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
-                    }}
+                    color="text.secondary"                    
                   >
                     {task.description || 'No description'}
                   </Typography>

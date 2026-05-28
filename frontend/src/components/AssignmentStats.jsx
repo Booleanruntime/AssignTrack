@@ -28,7 +28,9 @@ const AssignmentStats = ({ tasks}) => {
   <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
     <Card sx={{ flex: 1.2 }}>
       <CardContent>
-      <Stack direction="row" spacing={1} alignItems="center">
+      <Stack direction="row" spacing={1}  sx={{
+    alignItems: 'center'
+  }}>
         <Typography variant="h6">
           Total: {tasks.length}
         </Typography>
@@ -39,7 +41,9 @@ const AssignmentStats = ({ tasks}) => {
     {Object.values(ASSIGNMENT_STATUSES).map((status) => (
       <Card key={status}  sx={{ flex: 1 }}>
         <CardContent>
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction="row" spacing={1}  sx={{
+              alignItems: 'center'
+            }}>
           <Chip 
             color={getStatusColor(status)}
             size="small"

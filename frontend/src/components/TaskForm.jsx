@@ -11,7 +11,7 @@ import {
 
 
 const emptyFormData = { title: '', description: '', deadline: '', subject: '', status: ASSIGNMENT_STATUSES.NOT_STARTED };
-const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects, setShowTaskForm }) => {
+const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects, setShowTaskForm, setHighlightedTaskId }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState(emptyFormData);
 
@@ -43,11 +43,15 @@ const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects, setS
           headers: { Authorization: `Bearer ${user.token}` },
         });
         setTasks(tasks.map((task) => (task._id === response.data._id ? response.data : task)));
+        setHighlightedTaskId(response.data._id);
+        setTimeout(() => setHighlightedTaskId(null), 2500);
       } else {
         const response = await axiosInstance.post('/tasks', formData, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
         setTasks([...tasks, response.data]);
+        setHighlightedTaskId(response.data._id);
+        setTimeout(() => setHighlightedTaskId(null), 2500);
       }
       setEditingTask(null);
       setFormData(emptyFormData);

@@ -25,8 +25,10 @@ const SubjectList = ({
             <Stack
                 direction="row"
                 spacing={2}
-                alignItems="center"
-                justifyContent="space-between"
+                 sx={{
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}
               >
               <div style={{ flex: 1 }}>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
