@@ -5,18 +5,14 @@ on:
     branches:
       - main
       - feature/assignment-management
-       - deployment-test
+      - deployment-test
   pull_request:
     branches:
       - main
 
 jobs:
-  frontend-build:
+  build-and-test:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: frontend
 
     steps:
       - name: Checkout repository
@@ -27,8 +23,18 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm install
+
+      - name: Run backend tests
+        working-directory: backend
+        run: npm test
+
       - name: Install frontend dependencies
+        working-directory: frontend
         run: npm install
 
       - name: Build frontend
+        working-directory: frontend
         run: npm run build
