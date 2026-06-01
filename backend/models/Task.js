@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
 
 const taskSchema = new mongoose.Schema(
   {
@@ -21,6 +22,16 @@ const taskSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    subject: {
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'Subject',
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: Object.values(ASSIGNMENT_STATUSES),
+      default: ASSIGNMENT_STATUSES.NOT_STARTED,
+    }
   },
   { timestamps: true }
 );

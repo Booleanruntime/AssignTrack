@@ -9,7 +9,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axiosInstance.post('/api/auth/register', formData);
+      await axiosInstance.post('/auth/register', formData);
       alert('Registration successful. Please log in.');
       navigate('/login');
     } catch (error) {
@@ -42,7 +42,7 @@ const Register = () => {
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           className="w-full mb-4 p-2 border rounded"
         />
-        <button type="submit" className="w-full bg-green-600 text-white p-2 rounded">
+        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
           Register
         </button>
       </form>

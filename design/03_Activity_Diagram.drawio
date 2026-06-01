@@ -1,0 +1,101 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="IRgPUSF4XwOYQ_Pw1IHP">
+    <mxGraphModel dx="1925" dy="1064" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="LEV4uw6Rph9SGOQhLFpo-1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;recursiveResize=0;container=1;collapsible=0;width=170;height=30;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Act&amp;nbsp;Create Assignment&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="960" width="440" x="140" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-6" edge="1" parent="1" source="TPKRee_IAi3miODz6qWa-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="TPKRee_IAi3miODz6qWa-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-1" parent="1" style="shape=ellipse;html=1;fillColor=strokeColor;strokeWidth=2;verticalLabelPosition=bottom;verticalAlignment=top;perimeter=ellipsePerimeter;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="360" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-7" edge="1" parent="1" source="TPKRee_IAi3miODz6qWa-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="380" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-4" parent="1" style="shape=rect;html=1;rounded=1;whiteSpace=wrap;align=center;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;User logs in&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="160" x="300" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-9" edge="1" parent="1" source="TPKRee_IAi3miODz6qWa-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="380" y="490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-8" parent="1" style="shape=rect;html=1;rounded=1;whiteSpace=wrap;align=center;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Open Create Assignment Form&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="160" x="300" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-11" edge="1" parent="1" source="TPKRee_IAi3miODz6qWa-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="TPKRee_IAi3miODz6qWa-12">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="383" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-10" parent="1" style="shape=rect;html=1;rounded=1;whiteSpace=wrap;align=center;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Enter Assignment Details&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="160" x="303" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-13" edge="1" parent="1" source="TPKRee_IAi3miODz6qWa-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="280" y="640" />
+              <mxPoint x="280" y="720" />
+            </Array>
+            <mxPoint x="324.5" y="640" as="sourcePoint" />
+            <mxPoint x="280" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-15" connectable="0" parent="TPKRee_IAi3miODz6qWa-13" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="No" vertex="1">
+          <mxGeometry relative="1" x="0.3457" y="-1" as="geometry">
+            <mxPoint y="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-14" edge="1" parent="1" source="TPKRee_IAi3miODz6qWa-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="490" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-17" connectable="0" parent="TPKRee_IAi3miODz6qWa-14" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Yes" vertex="1">
+          <mxGeometry relative="1" x="0.3935" y="2" as="geometry">
+            <mxPoint x="-2" y="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-12" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Assignment Details Valid?&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="97" x="334.5" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-34" edge="1" parent="1" source="TPKRee_IAi3miODz6qWa-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="280" y="820" />
+              <mxPoint x="180" y="820" />
+              <mxPoint x="180" y="520" />
+            </Array>
+            <mxPoint x="300" y="520" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-18" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Display Error Message&amp;nbsp;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="220" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-21" edge="1" parent="1" source="TPKRee_IAi3miODz6qWa-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="492" y="840" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-20" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Save Assignment&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="431.5" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-22" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Display Success Message&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="440" y="840" as="geometry" />
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-23" parent="1" style="html=1;shape=mxgraph.sysml.actFinal;strokeWidth=2;verticalLabelPosition=bottom;verticalAlignment=top;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="360" y="969" as="geometry" />
+        </mxCell>
+        <mxCell id="TPKRee_IAi3miODz6qWa-30" edge="1" parent="1" source="TPKRee_IAi3miODz6qWa-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1.025;entryY=0.833;entryDx=0;entryDy=0;entryPerimeter=0;" target="TPKRee_IAi3miODz6qWa-23">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

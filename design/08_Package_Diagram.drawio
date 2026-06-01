@@ -1,0 +1,45 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="0bx5fWRg8Iy4BQFan5cn">
+    <mxGraphModel dx="585" dy="797" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="qiDy5uETJCeAJrNX3575-13" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;recursiveResize=0;container=1;collapsible=0;width=160;" value="&lt;b&gt;pkg AssignTrack Model&lt;/b&gt;" vertex="1">
+          <mxGeometry height="570" width="220" x="125" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="qiDy5uETJCeAJrNX3575-5" parent="1" style="shape=folder;fontStyle=1;tabWidth=110;tabHeight=40;tabPosition=left;html=1;boundedLbl=1;labelInHeader=1;container=1;collapsible=0;whiteSpace=wrap;" value="&lt;span style=&quot;font-size: 14px;&quot;&gt;Requirements Package&lt;/span&gt;" vertex="1">
+          <mxGeometry height="80" width="150" x="159" y="194" as="geometry" />
+        </mxCell>
+        <mxCell id="qiDy5uETJCeAJrNX3575-6" parent="qiDy5uETJCeAJrNX3575-5" style="html=1;strokeColor=none;resizeWidth=1;resizeHeight=1;fillColor=none;part=1;connectable=0;allowArrows=0;deletable=0;whiteSpace=wrap;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Requirement Diagram&lt;/font&gt;" vertex="1">
+          <mxGeometry height="44.57142857142857" relative="1" width="150" as="geometry">
+            <mxPoint y="40" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qiDy5uETJCeAJrNX3575-7" parent="1" style="shape=folder;fontStyle=1;tabWidth=110;tabHeight=36;tabPosition=left;html=1;boundedLbl=1;labelInHeader=1;container=1;collapsible=0;whiteSpace=wrap;" value="&lt;br&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;Behaviour Package&lt;/span&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="150" x="160" y="304" as="geometry" />
+        </mxCell>
+        <mxCell id="qiDy5uETJCeAJrNX3575-8" parent="qiDy5uETJCeAJrNX3575-7" style="html=1;strokeColor=none;resizeWidth=1;resizeHeight=1;fillColor=none;part=1;connectable=0;allowArrows=0;deletable=0;whiteSpace=wrap;" value="&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&amp;nbsp;Use Case, Activity, Sequence, State Machine&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" relative="1" width="150" as="geometry">
+            <mxPoint y="30" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qiDy5uETJCeAJrNX3575-9" parent="1" style="shape=folder;fontStyle=1;tabWidth=110;tabHeight=40;tabPosition=left;html=1;boundedLbl=1;labelInHeader=1;container=1;collapsible=0;whiteSpace=wrap;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Structure Package&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="150" x="160" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="qiDy5uETJCeAJrNX3575-10" parent="qiDy5uETJCeAJrNX3575-9" style="html=1;strokeColor=none;resizeWidth=1;resizeHeight=1;fillColor=none;part=1;connectable=0;allowArrows=0;deletable=0;whiteSpace=wrap;" value="&lt;div&gt;&lt;font size=&quot;3&quot;&gt;BDD, IBD&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" relative="1" width="150" as="geometry">
+            <mxPoint y="30" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qiDy5uETJCeAJrNX3575-11" parent="1" style="shape=folder;fontStyle=1;tabWidth=110;tabHeight=40;tabPosition=left;html=1;boundedLbl=1;labelInHeader=1;container=1;collapsible=0;whiteSpace=wrap;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Implementation Package&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="150" x="160" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="qiDy5uETJCeAJrNX3575-12" parent="qiDy5uETJCeAJrNX3575-11" style="html=1;strokeColor=none;resizeWidth=1;resizeHeight=1;fillColor=none;part=1;connectable=0;allowArrows=0;deletable=0;whiteSpace=wrap;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Frontend, Backend, MongoDB&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" relative="1" width="150" as="geometry">
+            <mxPoint y="30" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
