@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 
 const Profile = () => {
-  const { user } = useAuth(); // Access user token from context
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,7 +13,6 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Fetch profile data from the backend
     const fetchProfile = async () => {
       setLoading(true);
       try {
@@ -51,47 +50,84 @@ const Profile = () => {
     }
   };
 
+  const inputClass =
+    'w-full px-md py-sm bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary focus:border-primary transition-colors outline-none';
+  const labelClass = 'block font-label-md text-label-md text-on-surface mb-xs';
+
   if (loading) {
-    return <div className="text-center mt-20">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center py-xl text-on-surface-variant font-body-md text-body-md">
+        Loading...
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-md mx-auto mt-20">
-      <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded">
-        <h1 className="text-2xl font-bold mb-4 text-center">Your Profile</h1>
-        <input
-          type="text"
-          placeholder="Name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <input
-          type="text"
-          placeholder="University"
-          value={formData.university}
-          onChange={(e) => setFormData({ ...formData, university: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <input
-          type="text"
-          placeholder="Address"
-          value={formData.address}
-          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
+    <>
+      <div className="mb-lg">
+        <h2 className="font-headline-lg text-headline-lg text-primary tracking-tight">Your Profile</h2>
+        <p className="font-body-md text-body-md text-on-surface-variant mt-xs">
+          Update your personal and academic details.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="max-w-2xl bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm space-y-md">
+        <div>
+          <label className={labelClass} htmlFor="profile-name">Name</label>
+          <input
+            id="profile-name"
+            type="text"
+            placeholder="Your name"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className={inputClass}
+          />
+        </div>
+
+        <div>
+          <label className={labelClass} htmlFor="profile-email">Email</label>
+          <input
+            id="profile-email"
+            type="email"
+            placeholder="you@university.edu"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            className={inputClass}
+          />
+        </div>
+
+        <div>
+          <label className={labelClass} htmlFor="profile-university">University</label>
+          <input
+            id="profile-university"
+            type="text"
+            placeholder="University name"
+            value={formData.university}
+            onChange={(e) => setFormData({ ...formData, university: e.target.value })}
+            className={inputClass}
+          />
+        </div>
+
+        <div>
+          <label className={labelClass} htmlFor="profile-address">Address</label>
+          <input
+            id="profile-address"
+            type="text"
+            placeholder="Your address"
+            value={formData.address}
+            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+            className={inputClass}
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-primary text-on-primary font-label-md text-label-md py-sm px-lg rounded-lg hover:opacity-90 transition-opacity"
+        >
           {loading ? 'Updating...' : 'Update Profile'}
         </button>
       </form>
-    </div>
+    </>
   );
 };
 

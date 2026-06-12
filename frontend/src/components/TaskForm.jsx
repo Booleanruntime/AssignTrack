@@ -3,14 +3,14 @@ import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 import { ASSIGNMENT_STATUSES } from '../constants/assignmentStatuses';
 
-import {
-  Button,
-  TextField,
-  MenuItem
-} from '@mui/material';
+const emptyFormData = {
+  title: '',
+  description: '',
+  deadline: '',
+  subject: '',
+  status: ASSIGNMENT_STATUSES.NOT_STARTED,
+};
 
-
-const emptyFormData = { title: '', description: '', deadline: '', subject: '', status: ASSIGNMENT_STATUSES.NOT_STARTED };
 const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects, setShowTaskForm, setHighlightedTaskId }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState(emptyFormData);
@@ -22,7 +22,7 @@ const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects, setS
         description: editingTask.description,
         deadline: editingTask.deadline?.slice(0, 10),
         subject: editingTask.subject?._id || editingTask.subject || '',
-        status: editingTask.status || ASSIGNMENT_STATUSES.NOT_STARTED
+        status: editingTask.status || ASSIGNMENT_STATUSES.NOT_STARTED,
       });
     } else {
       setFormData(emptyFormData);
@@ -61,93 +61,110 @@ const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects, setS
     }
   };
 
+  const inputClass =
+    'w-full px-md py-sm bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary focus:border-primary transition-colors outline-none';
+  const labelClass = 'block font-label-md text-label-md text-on-surface mb-xs';
+
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded mb-6">
-      <h1 className="text-2xl font-bold mb-4">{editingTask ? 'Edit Assignment' : 'Create Assignment'}</h1>
-      <TextField
-        label="Assignment Title"
-        value={formData.title}
-        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-        fullWidth
-        margin="normal"
-        required
-      />
-      <TextField
-        label="Description"
-        value={formData.description}
-        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-        fullWidth
-        margin="normal"
-      />
-       <label  className="block text-sm font-medium text-gray-700 mt-4 mb-1">Due Date</label>  
-      {/* <InputLabel shrink htmlFor="deadline" className="block text-sm font-medium text-gray-700 mt-4 mb-1">Due Date</InputLabel> */}
-      <TextField
-        label=""
-        type="date"
-        value={formData.deadline}
-        onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-        fullWidth
-        margin="normal" 
-        required
-        InputLabelProps={{ shrink: true }}
-        
-      />
+    <form onSubmit={handleSubmit} className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm">
+      <h3 className="font-title-lg text-title-lg text-primary mb-md">
+        {editingTask ? 'Edit Assignment' : 'Create Assignment'}
+      </h3>
 
-      <TextField
-        select
-        label="Subject"
-        value={formData.subject}
-        onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-        fullWidth
-        margin="normal"
-        required
-      >
-        {subjects.map((subject) => (
-          <MenuItem key={subject._id} value={subject._id}>
-            {subject.name}
-          </MenuItem>
-        ))}
-      </TextField>
+      <div className="space-y-md">
+        <div>
+          <label className={labelClass} htmlFor="task-title">Assignment Title</label>
+          <input
+            id="task-title"
+            type="text"
+            className={inputClass}
+            placeholder="e.g. Database Architecture Project"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            required
+          />
+        </div>
 
-      <TextField
-        select
-        label="Status"
-        value={formData.status}
-        onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-        fullWidth
-        margin="normal"
-        required
-      >
-        {Object.values(ASSIGNMENT_STATUSES).map((status) => (
-          <MenuItem key={status} value={status}>
-            {status}
-          </MenuItem>
-        ))}
-      </TextField>
+        <div>
+          <label className={labelClass} htmlFor="task-description">Description</label>
+          <textarea
+            id="task-description"
+            rows={3}
+            className={inputClass}
+            placeholder="Add any details about this assignment"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          />
+        </div>
 
-      <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
-        <Button
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
+          <div>
+            <label className={labelClass} htmlFor="task-deadline">Due Date</label>
+            <input
+              id="task-deadline"
+              type="date"
+              className={inputClass}
+              value={formData.deadline}
+              onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <label className={labelClass} htmlFor="task-subject">Subject</label>
+            <select
+              id="task-subject"
+              className={inputClass}
+              value={formData.subject}
+              onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+              required
+            >
+              <option value="" disabled>Select a subject</option>
+              {subjects.map((subject) => (
+                <option key={subject._id} value={subject._id}>
+                  {subject.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className={labelClass} htmlFor="task-status">Status</label>
+            <select
+              id="task-status"
+              className={inputClass}
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              required
+            >
+              {Object.values(ASSIGNMENT_STATUSES).map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex gap-sm mt-lg">
+        <button
           type="submit"
-          variant="contained"
-          sx={{ backgroundColor: '#2e67e4', '&:hover': { backgroundColor: '#2457c5' } }}
-          fullWidth
+          className="flex-1 bg-primary text-on-primary font-label-md text-label-md py-sm px-lg rounded-lg hover:opacity-90 transition-opacity"
         >
           {editingTask ? 'Update Assignment' : 'Create Assignment'}
-        </Button>
-
-       
-          <Button
-            variant="outlined"
-            fullWidth
-            onClick={() => {
-              setEditingTask(null);
-              setFormData(emptyFormData);
-              setShowTaskForm(false);
-            }}
-          >
-            Cancel
-          </Button>
-        
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setEditingTask(null);
+            setFormData(emptyFormData);
+            setShowTaskForm(false);
+          }}
+          className="flex-1 border border-outline-variant text-on-surface-variant font-label-md text-label-md py-sm px-lg rounded-lg hover:bg-surface-container-low transition-colors"
+        >
+          Cancel
+        </button>
       </div>
     </form>
   );

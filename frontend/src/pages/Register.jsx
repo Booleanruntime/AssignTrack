@@ -116,8 +116,8 @@ const Register = () => {
               </div>
               <label className="ml-sm font-body-sm text-body-sm text-on-surface-variant cursor-pointer" htmlFor="terms">
                 I agree to the{' '}
-                <a className="text-primary hover:underline font-medium" href="#">Terms and Conditions</a> and{' '}
-                <a className="text-primary hover:underline font-medium" href="#">Privacy Policy</a>.
+                <button type="button" className="text-primary hover:underline font-medium">Terms and Conditions</button> and{' '}
+                <button type="button" className="text-primary hover:underline font-medium">Privacy Policy</button>.
               </label>
             </div>
 
@@ -149,10 +149,10 @@ const Register = () => {
           </p>
         </div>
         <nav className="flex gap-md font-label-sm text-label-sm text-on-surface-variant">
-          <a className="hover:text-primary underline transition-opacity duration-150" href="#">Privacy Policy</a>
-          <a className="hover:text-primary underline transition-opacity duration-150" href="#">Terms of Service</a>
-          <a className="hover:text-primary underline transition-opacity duration-150" href="#">Security</a>
-          <a className="hover:text-primary underline transition-opacity duration-150" href="#">Help Center</a>
+          <button type="button" className="hover:text-primary underline transition-opacity duration-150">Privacy Policy</button>
+          <button type="button" className="hover:text-primary underline transition-opacity duration-150">Terms of Service</button>
+          <button type="button" className="hover:text-primary underline transition-opacity duration-150">Security</button>
+          <button type="button" className="hover:text-primary underline transition-opacity duration-150">Help Center</button>
         </nav>
       </footer>
     </div>

@@ -18,7 +18,7 @@ const Login = () => {
       if (response.data.role === 'admin') {
         navigate('/subjects');
       } else {
-        navigate('/tasks');
+        navigate('/dashboard');
       }
     } catch (err) {
       setError('Login failed. Please check your email and password.');
@@ -92,9 +92,9 @@ const Login = () => {
                   Remember me
                 </label>
               </div>
-              <a className="font-label-sm text-label-sm text-primary hover:underline transition-all" href="#">
+              <button type="button" className="font-label-sm text-label-sm text-primary hover:underline transition-all">
                 Forgot password?
-              </a>
+              </button>
             </div>
 
             <button
@@ -128,10 +128,10 @@ const Login = () => {
           </p>
         </div>
         <nav className="flex gap-md font-label-sm text-label-sm text-on-surface-variant">
-          <a className="hover:text-primary underline transition-opacity duration-150" href="#">Privacy Policy</a>
-          <a className="hover:text-primary underline transition-opacity duration-150" href="#">Terms of Service</a>
-          <a className="hover:text-primary underline transition-opacity duration-150" href="#">Security</a>
-          <a className="hover:text-primary underline transition-opacity duration-150" href="#">Help Center</a>
+          <button type="button" className="hover:text-primary underline transition-opacity duration-150">Privacy Policy</button>
+          <button type="button" className="hover:text-primary underline transition-opacity duration-150">Terms of Service</button>
+          <button type="button" className="hover:text-primary underline transition-opacity duration-150">Security</button>
+          <button type="button" className="hover:text-primary underline transition-opacity duration-150">Help Center</button>
         </nav>
       </footer>
     </div>

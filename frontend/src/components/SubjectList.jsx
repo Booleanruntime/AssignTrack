@@ -1,12 +1,3 @@
-import {
-  TextField,
-  Button,
-  Card,
-  CardContent,
-  Typography,
-  Stack
-} from '@mui/material';
-
 const SubjectList = ({
   subjects,
   editingSubject,
@@ -15,129 +6,96 @@ const SubjectList = ({
   startEditingSubject,
   handleUpdateSubject,
   handleDeleteSubject,
-  setEditingSubject
+  setEditingSubject,
 }) => {
   return (
-    <>
-      {subjects.map((subject) => (
-        <Card key={subject._id} sx={{ mb: 2 }}>
-          <CardContent>
-            <Stack
-                direction="row"
-                spacing={2}
-                 sx={{
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                  }}
-              >
-              <div style={{ flex: 1 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                {subject.name}
-              </Typography>
+    <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+      {/* Table header */}
+      <div className="bg-surface-container-low px-lg py-sm border-b border-outline-variant grid grid-cols-12 gap-sm items-center">
+        <div className="col-span-4 font-label-sm text-label-sm text-on-secondary-container uppercase tracking-wider">Subject Name</div>
+        <div className="col-span-5 font-label-sm text-label-sm text-on-secondary-container uppercase tracking-wider">Description</div>
+        <div className="col-span-3 font-label-sm text-label-sm text-on-secondary-container uppercase tracking-wider text-right">Actions</div>
+      </div>
+
+      {/* Table body */}
+      <div className="divide-y divide-outline-variant">
+        {subjects.length === 0 && (
+          <div className="px-lg py-xl text-center font-body-md text-body-md text-on-surface-variant">
+            No subjects yet. Add one to get started.
+          </div>
+        )}
+
+        {subjects.map((subject) => {
+          const isEditing = editingSubject?._id === subject._id;
+          return (
+            <div
+              key={subject._id}
+              className="group grid grid-cols-12 gap-sm px-lg py-md items-center hover:bg-surface-bright transition-colors"
+            >
+              <div className="col-span-4">
+                <span className="font-title-lg text-title-lg text-on-surface">{subject.name}</span>
               </div>
 
-          <div style={{ flex: 2 }}>
-            {editingSubject?._id === subject._id ? (
-                <TextField
-                  label="Description"
-                  value={editDescription}
-                  onChange={(e) => setEditDescription(e.target.value)}
-                  fullWidth
-                  size="small"
-                />
-              ) : (
-                <>
-                  <Typography variant="body2" sx={{ fontWeight: 800, mb: 0.9 }}>
-                      Description
-                    </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 540 }}>
-                  {subject.description || 'No description'}
-                  </Typography>
-                   </>
-              )}
-          </div>
-          <Stack direction="row" spacing={1}>
-                {editingSubject?._id === subject._id ? (
-                  <>
-                  <Button
-                    variant="contained"
-                      size="small"
-                      sx={{
-                        backgroundColor: '#2e67e4',
-                        '&:hover': { backgroundColor: '#2457c5' },
-                        py: 0,
-                        px: 1,
-                        minHeight: 28,
-                        height: 30,
-                        minWidth: 54,
-                        fontSize: '0.82rem'
-                      }}
-                    onClick={() => handleUpdateSubject(subject._id)}
-                  >
-                    Save
-                  </Button>
+              <div className="col-span-5 pr-md">
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    className="w-full px-md py-xs bg-surface-container-lowest border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface focus:ring-2 focus:ring-primary focus:border-primary transition-colors outline-none"
+                    placeholder="Description"
+                    autoFocus
+                  />
+                ) : (
+                  <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">
+                    {subject.description || 'No description'}
+                  </p>
+                )}
+              </div>
 
-                  <Button
-                    variant="outlined"
-                    size="small"
-                      sx={{
-                        py: 0,
-                        px: 1,
-                        minHeight: 28,
-                        height: 30,
-                        minWidth: 54,
-                        fontSize: '0.82rem'
+              <div className="col-span-3 flex justify-end gap-sm">
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={() => handleUpdateSubject(subject._id)}
+                      className="px-md py-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 transition-opacity"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingSubject(null);
+                        setEditDescription('');
                       }}
-                    onClick={() => {
-                      setEditingSubject(null);
-                      setEditDescription('');
-                    }}
-                  >
-                    Cancel
-                  </Button>
-               
-              </>
-            ) : (
-              <>              
-                  <Button
-                    variant="outlined"
-                    size="small"
-                      sx={{
-                        py: 0,
-                        px: 1,
-                        minHeight: 28,
-                        height: 30,
-                        minWidth: 54,
-                        fontSize: '0.82rem'
-                      }}
-                    onClick={() => startEditingSubject(subject)}
-                  >
-                    Edit
-                  </Button>              
-                  <Button
-                    variant="outlined"
-                    color="error"
-                      size="small"
-                      sx={{
-                        py: 0,
-                        px: 1,
-                        minHeight: 28,
-                        height: 30,
-                        minWidth: 54,
-                        fontSize: '0.82rem'
-                      }}
-                    onClick={() => handleDeleteSubject(subject._id)}
-                  >
-                    Delete
-                  </Button>
-                 </>
-                 )}
-                </Stack>
-              </Stack>            
-          </CardContent>
-        </Card>
-      ))}
-    </>
+                      className="px-md py-xs rounded-lg border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex gap-sm opacity-0 group-hover:opacity-100 transition-opacity focus-within:opacity-100">
+                    <button
+                      onClick={() => startEditingSubject(subject)}
+                      title="Edit Description"
+                      className="p-xs rounded-lg border border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary transition-all bg-surface-container-lowest"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">edit</span>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteSubject(subject._id)}
+                      title="Delete Subject"
+                      className="p-xs rounded-lg border border-outline-variant text-error hover:bg-error-container hover:border-error transition-all bg-surface-container-lowest"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">delete</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 };
 
