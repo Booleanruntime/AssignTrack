@@ -30,6 +30,12 @@ const navLinkStyle = (path) => ({
 const isAuthPage =
   location.pathname === '/login' || location.pathname === '/register';
 
+  // Login and register own the whole viewport, so the top
+  // nav would just get in the way here.
+  if (isAuthPage) {
+    return null;
+  }
+
   return (
     <nav className="bg-white shadow-sm px-8 py-5 flex justify-between items-center">
         <div className="flex items-center gap-6">
