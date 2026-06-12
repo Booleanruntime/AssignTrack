@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-      - feature/assignment-management
-      - deployment-test
   pull_request:
     branches:
       - main

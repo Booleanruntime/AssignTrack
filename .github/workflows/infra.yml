@@ -1,0 +1,52 @@
+name: Infra (Terraform)
+
+# Manual apply/destroy for the whole stack. Keep this on a GitHub-hosted runner,
+# never the self-hosted one - a destroy would otherwise pull the rug out from
+# under the runner that's executing this job.
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Terraform action"
+        required: true
+        type: choice
+        options:
+          - apply
+          - destroy
+
+jobs:
+  terraform:
+    name: terraform ${{ inputs.action }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ap-southeast-2
+      # TF_VAR_* feed Terraform's input variables.
+      TF_VAR_github_owner: ${{ github.repository_owner }}
+      TF_VAR_github_repo: ${{ github.event.repository.name }}
+      TF_VAR_github_pat: ${{ secrets.GH_PAT }}
+      TF_VAR_prod_env: ${{ secrets.PROD }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" \
+            -backend-config="region=ap-southeast-2"
+
+      - name: Terraform ${{ inputs.action }}
+        run: terraform ${{ inputs.action }} -auto-approve
+
+      - name: Show outputs
+        if: ${{ inputs.action == 'apply' }}
+        run: terraform output

@@ -1,22 +1,54 @@
-name: Deployment Test
+name: Deploy
 
+# Deploys  on the box through its self-hosted runner. Every push to main:
+# sync the backend, reinstall, run the tests as a gate, restart pm2, then
+# rebuild the frontend into nginx's web root.
 on:
   push:
     branches:
-      - deployment-test
+      - main
 
 jobs:
-  test-self-hosted-runner:
+  deploy:
+    name: Deploy to EC2 (self-hosted)
     runs-on: self-hosted
 
+    env:
+      APP_DIR: /home/ubuntu/app
+      WEB_ROOT: /var/www/assigntrack
+
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Confirm runner machine
+      # --- Backend ---------------------------------------------------------
+      - name: Sync backend into the live app dir (preserve .env)
+        run: rsync -a --delete --exclude='.env' --exclude='node_modules' backend/ "$APP_DIR/backend/"
+
+      - name: Write production .env
+        run: printf '%s' "${{ secrets.PROD }}" > "$APP_DIR/backend/.env"
+
+      - name: Install backend dependencies
+        working-directory: /home/ubuntu/app/backend
+        run: npm install
+
+      - name: Run backend tests (deploy gate)
+        working-directory: /home/ubuntu/app/backend
+        run: npm test
+
+      - name: Restart backend with PM2
         run: |
-          pwd
-          ls
-          hostname
-          node --version
-          npm --version
+          pm2 restart assigntrack-backend || pm2 start "$APP_DIR/backend/server.js" --name assigntrack-backend
+          pm2 save
+
+      # --- Frontend --------------------------------------------------------
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publish frontend to the nginx web root
+        run: |
+          sudo rsync -a --delete frontend/build/ "$WEB_ROOT/"
+          sudo chown -R www-data:www-data "$WEB_ROOT"

@@ -1,0 +1,16 @@
+# Terraform — never commit state, local vars, plans, or provider binaries.
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+*.tfvars.json
+!terraform.tfvars.example
+*.tfplan
+tfplan
+*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
