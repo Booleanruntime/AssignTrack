@@ -1,23 +1,19 @@
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
-import SchoolIcon from '@mui/icons-material/School';
-
-import {
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Chip,
-  Stack
-} from '@mui/material';
 import { ASSIGNMENT_STATUSES } from '../constants/assignmentStatuses';
+
+// Badge styling per status. Default (Not Started) falls back to a neutral chip.
+const STATUS_BADGE = {
+  [ASSIGNMENT_STATUSES.COMPLETED]: 'bg-tertiary-fixed-dim/30 text-on-tertiary-container',
+  [ASSIGNMENT_STATUSES.IN_PROGRESS]: 'bg-primary/10 text-primary',
+  [ASSIGNMENT_STATUSES.OVERDUE]: 'bg-error/10 text-error',
+  [ASSIGNMENT_STATUSES.NOT_STARTED]: 'bg-surface-variant text-on-surface-variant',
+};
 
 const TaskList = ({ tasks, setTasks, setEditingTask, openTaskForm, highlightedTaskId }) => {
   const { user } = useAuth();
-  
 
   const handleDelete = async (taskId) => {
-
     const confirmDelete = window.confirm('Are you sure you want to delete this assignment?');
     if (!confirmDelete) {
       return;
@@ -33,129 +29,77 @@ const TaskList = ({ tasks, setTasks, setEditingTask, openTaskForm, highlightedTa
     }
   };
 
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case ASSIGNMENT_STATUSES.COMPLETED:
-        return 'success';
-      case ASSIGNMENT_STATUSES.IN_PROGRESS:
-        return 'primary';
-      case ASSIGNMENT_STATUSES.OVERDUE:
-        return 'error';
-      default:
-        return 'default';
-    }
-  };
+  if (tasks.length === 0) {
+    return (
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-xl flex flex-col items-center gap-md text-on-surface-variant">
+        <span className="material-symbols-outlined text-display-lg text-outline">assignment</span>
+        <p className="font-body-md text-body-md text-center">No assignments match your filters.</p>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      {tasks.map((task) => (
+    <div className="flex flex-col gap-md">
+      {tasks.map((task) => {
+        const isHighlighted = task._id === highlightedTaskId;
+        return (
+          <div
+            key={task._id}
+            className={`bg-surface-container-lowest border rounded-xl p-md flex flex-col md:flex-row md:items-center gap-md transition-all ${
+              isHighlighted ? 'border-primary ring-2 ring-primary/20' : 'border-outline-variant'
+            }`}
+          >
+            <div className="flex-1 min-w-0">
+              <h4 className="font-title-lg text-title-lg text-on-surface">{task.title}</h4>
+              <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-xs">
+                {task.description || 'No description'}
+              </p>
+            </div>
 
-          <Card key={task._id} sx={{ mb: 2,
-            border: task._id === highlightedTaskId ? '2px solid #2e67e4' : '1px solid transparent',
-            boxShadow: task._id === highlightedTaskId
-              ? '0 0 0 3px rgba(46, 103, 228, 0.12)'
-              : undefined,
-            transition: 'all 0.3s ease' }}>
+            <div className="flex items-center gap-lg">
+              <div className="min-w-[110px]">
+                <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">Subject</span>
+                <span className="font-body-sm text-body-sm text-on-surface flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[16px] text-on-surface-variant">school</span>
+                  {task.subject?.name || 'No subject'}
+                </span>
+              </div>
 
-            <CardContent>
-              <Stack
-                direction="row"
-                spacing={2}
-                 sx={{
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                  }}
+              <div className="min-w-[100px]">
+                <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">Due date</span>
+                <span className="font-body-sm text-body-sm text-on-surface">{new Date(task.deadline).toLocaleDateString()}</span>
+              </div>
+
+              <div className="min-w-[110px]">
+                <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">Status</span>
+                <span className={`inline-block font-label-sm text-label-sm px-2 py-1 rounded-full whitespace-nowrap ${STATUS_BADGE[task.status] || STATUS_BADGE[ASSIGNMENT_STATUSES.NOT_STARTED]}`}>
+                  {task.status}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-sm md:flex-col lg:flex-row">
+              <button
+                onClick={() => {
+                  setEditingTask(task);
+                  openTaskForm();
+                }}
+                title="Edit assignment"
+                className="p-xs rounded-lg border border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary transition-all"
               >
-                <div style={{ flex: 1.5 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    {task.title}
-                  </Typography>
-
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"                    
-                  >
-                    {task.description || 'No description'}
-                  </Typography>
-                </div>
-
-                <div style={{ flex: 0.8 }}>
-                  
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.9 }}>
-                    <SchoolIcon fontSize="small" color="action" />
-                    Subject
-                  </Typography>
-                  <Typography variant="body2">
-                    {task.subject?.name || 'No Subject'}
-                  </Typography>
-                </div>
-              
-
-                <div style={{ flex: 0.8 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.9 }}>
-                    Due date
-                  </Typography>
-                  <Typography variant="body2">
-                    {new Date(task.deadline).toLocaleDateString()}
-                  </Typography>
-                </div>
-                
-                <div style={{ flex: 0.8 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.9 }}>
-                    Status
-                  </Typography>
-                  <Chip
-                    label={task.status}
-                    color={getStatusColor(task.status)}
-                    size="small"
-                  />
-                </div>
-
-                <Stack direction="row" spacing={1}>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    sx={{
-                      py: 0,
-                      px: 1,
-                      minHeight: 28,
-                      height: 30,
-                      minWidth: 54,
-                      fontSize: '0.72rem'
-                    }}
-                    onClick={() => {
-                      setEditingTask(task);
-                      openTaskForm();
-                    }}
-                  >
-                    Edit
-                  </Button>
-
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    size="small"
-                    sx={{
-                      py: 0,
-                      px: 1,
-                      minHeight: 28,
-                      height: 30,
-                      minWidth: 54,
-                      fontSize: '0.72rem'
-                    }}                                          
-                    onClick={() => handleDelete(task._id)}
-                  >
-                    Delete
-                  </Button>
-                </Stack>
-              </Stack>
-            </CardContent>
-
-          </Card>
-        
-        
-      ))}
+                <span className="material-symbols-outlined text-[20px]">edit</span>
+              </button>
+              <button
+                onClick={() => handleDelete(task._id)}
+                title="Delete assignment"
+                className="p-xs rounded-lg border border-outline-variant text-error hover:bg-error-container hover:border-error transition-all"
+              >
+                <span className="material-symbols-outlined text-[20px]">delete</span>
+              </button>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };

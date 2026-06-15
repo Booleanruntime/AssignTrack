@@ -1,64 +1,43 @@
 import { ASSIGNMENT_STATUSES } from '../constants/assignmentStatuses';
 
-import {
-  Card,
-  CardContent,
-  Typography,
-  Stack,
-  Chip,
-} from '@mui/material';
+// Status -> accent colour for its count card, mirroring the dashboard cards.
+const STATUS_ACCENT = {
+  [ASSIGNMENT_STATUSES.NOT_STARTED]: 'text-on-surface-variant',
+  [ASSIGNMENT_STATUSES.IN_PROGRESS]: 'text-primary',
+  [ASSIGNMENT_STATUSES.COMPLETED]: 'text-on-tertiary-container',
+  [ASSIGNMENT_STATUSES.OVERDUE]: 'text-error',
+};
 
-
-const AssignmentStats = ({ tasks}) => {
-
-    const getStatusColor = (status) => {
-    switch (status) {
-      case ASSIGNMENT_STATUSES.COMPLETED:
-        return 'success';
-      case ASSIGNMENT_STATUSES.IN_PROGRESS:
-        return 'primary';
-      case ASSIGNMENT_STATUSES.OVERDUE:
-        return 'error';
-      default:
-        return 'default';
-    }
-  };
+const AssignmentStats = ({ tasks }) => {
+  const countByStatus = (status) => tasks.filter((task) => task.status === status).length;
 
   return (
-  <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
-    <Card sx={{ flex: 1.2 }}>
-      <CardContent>
-      <Stack direction="row" spacing={1}  sx={{
-    alignItems: 'center'
-  }}>
-        <Typography variant="h6">
-          Total: {tasks.length}
-        </Typography>
-      </Stack>
-    </CardContent>
-    </Card>
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-md mb-lg">
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-col justify-between">
+        <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-lg">Total</span>
+        <span className="font-headline-lg text-headline-lg text-primary">{tasks.length}</span>
+      </div>
 
-    {Object.values(ASSIGNMENT_STATUSES).map((status) => (
-      <Card key={status}  sx={{ flex: 1 }}>
-        <CardContent>
-          <Stack direction="row" spacing={1}  sx={{
-              alignItems: 'center'
-            }}>
-          <Chip 
-            color={getStatusColor(status)}
-            size="small"
-            sx={{ mt: 1 }}
-          />
-
-          <Typography variant="h6">
-            {status}: {tasks.filter((task) => task.status === status).length}
-          </Typography>
-          </Stack>
-        </CardContent>
-      </Card>
-    ))}
-  </Stack>
-);
+      {Object.values(ASSIGNMENT_STATUSES).map((status) => {
+        const isOverdue = status === ASSIGNMENT_STATUSES.OVERDUE;
+        return (
+          <div
+            key={status}
+            className={`bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-col justify-between ${
+              isOverdue ? 'bg-error-container/20' : ''
+            }`}
+          >
+            <span className={`font-label-sm text-label-sm uppercase tracking-wider mb-lg ${STATUS_ACCENT[status]}`}>
+              {status}
+            </span>
+            <span className={`font-headline-lg text-headline-lg ${isOverdue ? 'text-error' : 'text-primary'}`}>
+              {countByStatus(status)}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
 };
 
 export default AssignmentStats;
