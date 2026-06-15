@@ -95,9 +95,7 @@ If the EC2 instance is stopped:
 
 ## Public URL
 
-Current URL:
-
-http://3.27.70.75
+Current URL: http://13.211.223.217/login
 
 **Note:** The EC2 public IP may change if the instance is stopped and restarted in the AWS teaching environment.
 
