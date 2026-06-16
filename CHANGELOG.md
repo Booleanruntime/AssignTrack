@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED]
 
+### Added
+
+- Teacher role with UserFactory (Factory) and Singleton Logger; admin-only user creation endpoint
+
 ## [1.0.0] - 12-06-2026
 
 ### Added
