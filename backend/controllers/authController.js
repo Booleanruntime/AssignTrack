@@ -49,6 +49,18 @@ const createUser = async (req, res) => {
     }
 };
 
+// used by the assign-teachers UI to fill the picker. ?role=teacher filters it.
+const getUsers = async (req, res) => {
+    try {
+        const filter = req.query.role ? { role: req.query.role } : {};
+        const users = await User.find(filter).select('name email role');
+        res.json(users);
+    } catch (error) {
+        logger.error(`List users failed: ${error.message}`);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -108,4 +120,4 @@ const updateUserProfile = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, createUser, loginUser, updateUserProfile, getProfile };
+module.exports = { registerUser, createUser, getUsers, loginUser, updateUserProfile, getProfile };

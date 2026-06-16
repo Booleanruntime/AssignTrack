@@ -13,7 +13,14 @@ const subjectSchema = mongoose.Schema(
         type: String,
         trim: true
 
-    }
+    },
+    // teachers an admin has assigned to run this subject
+    teachers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      }
+    ]
   },
   {
     timestamps: true
