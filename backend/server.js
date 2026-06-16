@@ -22,6 +22,7 @@ console.log('subjectRoutes loaded:', typeof subjectRoutes);
 
 app.use('/api/tasks', taskRoutes);
 app.use('/api/subjects', subjectRoutes);
+app.use('/api/grades', require('./routes/gradeRoutes'));
 console.log('Subject routes registered');
 
 // Export the app object for testing

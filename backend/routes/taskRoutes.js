@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Task = require('../models/Task');
+const Subject = require('../models/Subject');
 const { protect } = require('../middleware/authMiddleware');
+const { UserFactory } = require('../factories/UserFactory');
 
 router.get('/', protect, async (req, res) => {
   try {
@@ -9,6 +11,25 @@ router.get('/', protect, async (req, res) => {
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch tasks' });
+  }
+});
+
+// tasks a teacher is allowed to grade - everything under the subjects they've
+// been assigned to. uses the teacher list added in the assign-teachers feature.
+router.get('/gradeable', protect, async (req, res) => {
+  try {
+    const account = UserFactory.create(req.user);
+    if (!account.canGrade()) {
+      return res.status(403).json({ message: 'Only teachers can view gradeable tasks' });
+    }
+
+    const subjects = await Subject.find({ teachers: req.user._id }).select('_id');
+    const tasks = await Task.find({ subject: { $in: subjects.map((s) => s._id) } })
+      .populate('subject', 'name')
+      .populate('user', 'name email');
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch gradeable tasks' });
   }
 });
 
