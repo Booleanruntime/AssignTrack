@@ -2,7 +2,9 @@ const ASSIGNMENT_STATUSES = {
   NOT_STARTED: 'Not Started',
   IN_PROGRESS: 'In Progress',
   COMPLETED: 'Completed',
-  OVERDUE: 'Overdue'
+  OVERDUE: 'Overdue',
+  SUBMITTED: 'Submitted',
+  GRADED: 'Graded'
 };
 
 module.exports = { ASSIGNMENT_STATUSES };

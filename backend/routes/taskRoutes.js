@@ -4,6 +4,8 @@ const Task = require('../models/Task');
 const Subject = require('../models/Subject');
 const { protect } = require('../middleware/authMiddleware');
 const { UserFactory } = require('../factories/UserFactory');
+const { getAssignmentState } = require('../states/AssignmentState');
+const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
 
 router.get('/', protect, async (req, res) => {
   try {
@@ -24,7 +26,12 @@ router.get('/gradeable', protect, async (req, res) => {
     }
 
     const subjects = await Subject.find({ teachers: req.user._id }).select('_id');
-    const tasks = await Task.find({ subject: { $in: subjects.map((s) => s._id) } })
+    // only surface work that's actually been handed in - anything still in
+    // progress or already graded shouldn't show up as gradeable
+    const tasks = await Task.find({
+      subject: { $in: subjects.map((s) => s._id) },
+      status: ASSIGNMENT_STATUSES.SUBMITTED,
+    })
       .populate('subject', 'name')
       .populate('user', 'name email');
     res.json(tasks);
@@ -49,6 +56,28 @@ router.post('/', protect, async (req, res) => {
     res.status(201).json(populatedTask);
   } catch (error) {
     res.status(500).json({ message: 'Failed to save task' });
+  }
+});
+
+// a student hands their own assignment in for marking. the current state decides
+// whether that's allowed - you can't re-submit something already submitted or graded.
+router.put('/:id/submit', protect, async (req, res) => {
+  try {
+    const task = await Task.findOne({ _id: req.params.id, user: req.user._id });
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    if (!getAssignmentState(task.status).canSubmit()) {
+      return res.status(400).json({ message: `Assignment can't be submitted from "${task.status}"` });
+    }
+
+    task.status = ASSIGNMENT_STATUSES.SUBMITTED;
+    const saved = await task.save();
+    const populated = await saved.populate('subject');
+    res.json(populated);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to submit assignment' });
   }
 });
 

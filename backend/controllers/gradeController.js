@@ -5,6 +5,8 @@ const { UserFactory } = require('../factories/UserFactory');
 const { getGradingStrategy } = require('../strategies/GradingStrategy');
 const FeedbackBuilder = require('../builders/FeedbackBuilder');
 const computeOverall = require('../utils/computeOverall');
+const { getAssignmentState } = require('../states/AssignmentState');
+const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
 
 const logger = Logger.getInstance();
 
@@ -28,6 +30,12 @@ const createGrade = async (req, res) => {
         const task = await Task.findById(taskId);
         if (!task) return res.status(404).json({ message: 'Task not found' });
 
+        // the state decides whether grading is even on the table - you can't mark
+        // something the student hasn't handed in yet
+        if (!getAssignmentState(task.status).canBeGraded()) {
+            return res.status(400).json({ message: 'Assignment must be submitted before it can be graded' });
+        }
+
         // the rubric is the source of truth - work the overall out of it rather
         // than trusting a number from the client
         const score = computeOverall(req.body.rubric);
@@ -49,6 +57,11 @@ const createGrade = async (req, res) => {
             passed,
             feedback: buildFeedback(req.body),
         });
+
+        // move the task on so it drops off the gradeable list and the student
+        // sees it as marked
+        task.status = ASSIGNMENT_STATUSES.GRADED;
+        await task.save();
 
         logger.info(`${req.user.email} graded task ${taskId}: ${label}`);
         res.status(201).json(grade);
