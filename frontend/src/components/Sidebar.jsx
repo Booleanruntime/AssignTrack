@@ -17,8 +17,14 @@ const Sidebar = () => {
     { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
     { to: '/tasks', label: 'Assignments', icon: 'assignment' },
     { to: '/subjects', label: 'Subjects', icon: 'menu_book', adminOnly: true },
+    { to: '/grades', label: 'My Grades', icon: 'grade', studentOnly: true },
     { to: '/profile', label: 'Profile', icon: 'account_circle' },
   ];
+
+  // an item shows unless it's gated to a role the current user isn't in
+  const canSee = (item) =>
+    (!item.adminOnly || user?.role === 'admin') &&
+    (!item.studentOnly || user?.role === 'student');
 
   const isActive = (to) => location.pathname === to;
 
@@ -48,7 +54,7 @@ const Sidebar = () => {
 
       <nav className="flex-1 flex flex-col gap-xs">
         {navItems
-          .filter((item) => !item.adminOnly || user?.role === 'admin')
+          .filter(canSee)
           .map((item) => (
             <Link key={item.to} to={item.to} className={linkClass(item.to)}>
               <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
