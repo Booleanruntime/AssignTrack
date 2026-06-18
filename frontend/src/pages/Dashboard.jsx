@@ -4,6 +4,13 @@ import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
 import { ASSIGNMENT_STATUSES } from '../constants/assignmentStatuses';
 
+
+const PRIORITY_BADGE = {
+  High: 'bg-primary/10 text-primary',
+  Medium: 'bg-surface-variant text-on-surface-variant',
+  Low: 'bg-surface-variant text-on-surface-variant',
+};
+
 // Maps each status to the icon + accent colour used on its count card.
 const STATUS_CARDS = [
   { status: ASSIGNMENT_STATUSES.NOT_STARTED, icon: 'radio_button_unchecked', accent: 'text-on-surface-variant' },
@@ -167,12 +174,23 @@ const Dashboard = () => {
                 .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                 .slice(0, 5)
                 .map((task) => (
-                  <div key={task._id} className="flex items-center justify-between py-sm gap-md">
+                  <div key={task._id} className="grid grid-cols-[1fr_120px_120px] items-center py-sm gap-md">
                     <div className="min-w-0">
                       <p className="font-label-md text-label-md text-on-surface font-medium truncate">{task.title}</p>
-                      <p className="font-body-sm text-body-sm text-on-surface-variant">{task.subject?.name || 'No subject'}</p>
+                      <p className="font-body-sm text-body-sm text-on-surface-variant">{task.subject?.name || 'No subject'}</p>                       
+                    </div> 
+                    <div className="flex justify-center">                   
+                    <span
+                        className={`inline-block font-label-sm text-label-sm px-2 py-1 rounded-full whitespace-nowrap ${
+                          PRIORITY_BADGE[task.priority] || PRIORITY_BADGE.Low
+                        }`}
+                      >
+                        {task.priority  || 'Low'}
+                    </span>     
                     </div>
+                    <div className="flex justify-end">                                                        
                     <span className="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">{task.status}</span>
+                    </div>
                   </div>
                 ))}
             </div>

@@ -10,6 +10,13 @@ const STATUS_BADGE = {
   [ASSIGNMENT_STATUSES.NOT_STARTED]: 'bg-surface-variant text-on-surface-variant',
 };
 
+// Badge styling per priority. Default (Low) falls back to a neutral chip.
+const PRIORITY_BADGE = {
+  High: 'bg-error/10 text-error',
+  Medium: 'bg-amber-100 text-amber-700',
+  Low: 'bg-surface-variant text-on-surface-variant',
+};
+
 const TaskList = ({ tasks, setTasks, setEditingTask, openTaskForm, highlightedTaskId }) => {
   const { user } = useAuth();
 
@@ -74,6 +81,12 @@ const TaskList = ({ tasks, setTasks, setEditingTask, openTaskForm, highlightedTa
                 <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">Status</span>
                 <span className={`inline-block font-label-sm text-label-sm px-2 py-1 rounded-full whitespace-nowrap ${STATUS_BADGE[task.status] || STATUS_BADGE[ASSIGNMENT_STATUSES.NOT_STARTED]}`}>
                   {task.status}
+                </span>
+              </div>
+              <div className="min-w-[110px]">
+                <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">Priority</span>
+                <span className={`inline-block font-label-sm text-label-sm px-2 py-1 rounded-md whitespace-nowrap ${PRIORITY_BADGE[task.priority] || PRIORITY_BADGE['Low']}`}>
+                  {task.priority}
                 </span>
               </div>
             </div>
