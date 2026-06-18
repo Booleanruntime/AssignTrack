@@ -1,45 +1,39 @@
-import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import axiosInstance from '../axiosConfig';
-import TaskForm from '../components/TaskForm';
 import TaskList from '../components/TaskList';
 import { useAuth } from '../context/AuthContext';
 import AssignmentStats from '../components/AssignmentStats';
 import AssignmentFilters from '../components/AssignmentFilters';
 import { getAssignmentSortStrategy } from '../utils/assignmentSortStrategies';
 
+// a student's assigned work. assignments are set by teachers and land here
+// automatically once the student is enrolled in the subject - students track
+// their progress and submit, but don't create or delete the work itself.
 const Tasks = () => {
   const { user } = useAuth();
-  const location = useLocation();
   const [tasks, setTasks] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [statusFilter, setStatusFilter] = useState('all');
   const [subjectFilter, setSubjectFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState('asc');
   const [search, setSearch] = useState('');
-  const [editingTask, setEditingTask] = useState(null);
-  const [showTaskForm, setShowTaskForm] = useState(false);
-  const [highlightedTaskId, setHighlightedTaskId] = useState(null);
-  const taskFormRef = useRef(null);
 
   useEffect(() => {
     if (!user?.token) return;
+    const authHeader = { headers: { Authorization: `Bearer ${user.token}` } };
+
     const fetchTasks = async () => {
       try {
-        const response = await axiosInstance.get('/tasks', {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
+        const response = await axiosInstance.get('/tasks', authHeader);
         setTasks(response.data);
       } catch (error) {
-        alert('Failed to fetch tasks.');
+        alert('Failed to fetch assignments.');
       }
     };
 
     const fetchSubjects = async () => {
       try {
-        const response = await axiosInstance.get('/subjects', {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
+        const response = await axiosInstance.get('/subjects', authHeader);
         setSubjects(response.data);
       } catch (error) {
         alert('Failed to fetch subjects.');
@@ -49,14 +43,6 @@ const Tasks = () => {
     fetchTasks();
     fetchSubjects();
   }, [user]);
-
-  // The sidebar's "New Assignment" button routes here with this flag set.
-  useEffect(() => {
-    if (location.state?.openForm) {
-      openTaskForm();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.state]);
 
   const filteredTasks = tasks
     .filter((task) => {
@@ -73,49 +59,16 @@ const Tasks = () => {
     })
     .sort(getAssignmentSortStrategy(sortOrder));
 
-  const openTaskForm = () => {
-    setShowTaskForm(true);
-    setTimeout(() => {
-      taskFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
-  };
-
   return (
     <>
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-lg gap-md">
-        <div>
-          <h2 className="font-headline-lg text-headline-lg text-primary tracking-tight">My Assignments</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-xs">
-            Track and manage every assignment across your subjects.
-          </p>
-        </div>
-        <button
-          onClick={() => {
-            setEditingTask(null);
-            openTaskForm();
-          }}
-          className="inline-flex items-center justify-center gap-xs bg-primary text-on-primary font-label-md text-label-md px-md py-sm rounded-lg hover:opacity-90 transition-opacity shadow-sm whitespace-nowrap"
-        >
-          <span className="material-symbols-outlined text-[18px]">add</span>
-          Create Assignment
-        </button>
+      <div className="mb-lg">
+        <h2 className="font-headline-lg text-headline-lg text-primary tracking-tight">My Assignments</h2>
+        <p className="font-body-md text-body-md text-on-surface-variant mt-xs">
+          Work your teachers have set. Track your progress and submit when you're ready.
+        </p>
       </div>
 
       <AssignmentStats tasks={tasks} />
-
-      {showTaskForm && (
-        <div ref={taskFormRef} className="mb-lg">
-          <TaskForm
-            tasks={tasks}
-            setTasks={setTasks}
-            editingTask={editingTask}
-            setEditingTask={setEditingTask}
-            subjects={subjects}
-            setShowTaskForm={setShowTaskForm}
-            setHighlightedTaskId={setHighlightedTaskId}
-          />
-        </div>
-      )}
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md mb-lg space-y-md">
         <div className="relative">
@@ -139,13 +92,7 @@ const Tasks = () => {
         />
       </div>
 
-      <TaskList
-        tasks={filteredTasks}
-        setTasks={setTasks}
-        setEditingTask={setEditingTask}
-        openTaskForm={openTaskForm}
-        highlightedTaskId={highlightedTaskId}
-      />
+      <TaskList tasks={filteredTasks} setTasks={setTasks} />
     </>
   );
 };

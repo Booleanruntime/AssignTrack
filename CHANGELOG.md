@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Teacher grading with Strategy (grading schemes) and Builder (feedback); grading endpoints and teacher grading panel
 - Assignment submission lifecycle with State pattern 
 - Student "My Grades" page to view grades and feedback
+- Teacher-authored assignments that auto-assign to enrolled students, with teacher authoring page
+- Admin-managed student enrolment in subjects (Proxy-guarded)
+- Role-aware navigation and dashboards for student, teacher and admin
+
+### Changed
+
+- Students no longer create their own assignments; they receive teacher-set work and can only update progress, submit, and view grades
 
 ## [1.0.0] - 12-06-2026
 

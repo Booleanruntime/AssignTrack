@@ -20,6 +20,14 @@ const subjectSchema = mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
       }
+    ],
+    // students an admin has enrolled in this subject. enrolled students receive
+    // every assignment a teacher sets on the subject.
+    students: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      }
     ]
   },
   {

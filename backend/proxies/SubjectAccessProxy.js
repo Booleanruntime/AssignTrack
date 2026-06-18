@@ -33,6 +33,17 @@ class SubjectAccessProxy {
         // anyone who can see subjects can read the roster, so no gate here
         return this.service.listTeachers(subjectId);
     }
+
+    async setStudents(subjectId, studentIds) {
+        this._denyIfNotAllowed('setStudents');
+        const subject = await this.service.setStudents(subjectId, studentIds);
+        logger.info(`Admin ${this.account.name} enrolled ${studentIds.length} student(s) in subject ${subjectId}`);
+        return subject;
+    }
+
+    async listStudents(subjectId) {
+        return this.service.listStudents(subjectId);
+    }
 }
 
 module.exports = SubjectAccessProxy;

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
 import { ASSIGNMENT_STATUSES } from '../constants/assignmentStatuses';
+import TeacherDashboard from '../components/TeacherDashboard';
 
 
 const PRIORITY_BADGE = {
@@ -41,7 +42,8 @@ const dueLabel = (deadline) => {
   return { text: `In ${days} Days`, tone: 'bg-surface-variant text-on-surface-variant' };
 };
 
-const Dashboard = () => {
+// the student view - the original dashboard, now scoped to its one role
+const StudentDashboard = () => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
 
@@ -199,6 +201,14 @@ const Dashboard = () => {
       </div>
     </>
   );
+};
+
+// /dashboard is shared, so hand off to the right view for the role. admins land
+// on /subjects at login, so they don't reach here in normal use.
+const Dashboard = () => {
+  const { user } = useAuth();
+  if (user?.role === 'teacher') return <TeacherDashboard />;
+  return <StudentDashboard />;
 };
 
 export default Dashboard;

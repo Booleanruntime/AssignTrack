@@ -42,6 +42,12 @@ router.get('/gradeable', protect, async (req, res) => {
 
 router.post('/', protect, async (req, res) => {
   try {
+    // assignments are authored by teachers and fanned out to enrolled students -
+    // students no longer create their own work
+    if (req.user.role === 'student') {
+      return res.status(403).json({ message: "Assignments are set by your teacher; you can't create them" });
+    }
+
     const { title, description, deadline, status, subject, priority } = req.body;
 
     const task = await Task.create({
@@ -82,13 +88,25 @@ router.put('/:id/submit', protect, async (req, res) => {
   }
 });
 
+// a student updates their own progress on an assigned task. the title, deadline
+// and subject belong to the teacher's assignment, so this only moves the status -
+// and only between the states a student is allowed to set by hand. Submitted and
+// Graded are reached through the submit and grade flows, not here.
 router.put('/:id', protect, async (req, res) => {
   try {
-    const { title, description, deadline, status, subject, priority } = req.body;
+    const { status } = req.body;
+    const studentSettable = [
+      ASSIGNMENT_STATUSES.NOT_STARTED,
+      ASSIGNMENT_STATUSES.IN_PROGRESS,
+      ASSIGNMENT_STATUSES.COMPLETED,
+    ];
+    if (!studentSettable.includes(status)) {
+      return res.status(400).json({ message: 'Status must be Not Started, In Progress or Completed' });
+    }
 
     const task = await Task.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
-      { title, description, deadline, status, subject, priority },
+      { status },
       { new: true, runValidators: true }
     ).populate('subject');
 
@@ -104,6 +122,12 @@ router.put('/:id', protect, async (req, res) => {
 
 router.delete('/:id', protect, async (req, res) => {
   try {
+    // students can't delete teacher-assigned work; a teacher removes it by
+    // deleting the assignment, which cascades to the instances
+    if (req.user.role === 'student') {
+      return res.status(403).json({ message: 'Assignments are managed by your teacher' });
+    }
+
     const task = await Task.findOneAndDelete({
       _id: req.params.id,
       user: req.user._id,

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 import { ASSIGNMENT_STATUSES } from '../constants/assignmentStatuses';
@@ -21,61 +22,46 @@ const PRIORITY_BADGE = {
   Low: 'bg-surface-variant text-on-surface-variant',
 };
 
-// mirrors the backend State pattern: a student can still hand work in from any
-// of these, but not once it's submitted or graded.
-const SUBMITTABLE = [
+// the statuses a student can set by hand. Submitted and Graded are reached
+// through the submit and grade flows, so they lock the row.
+const SETTABLE = [
   ASSIGNMENT_STATUSES.NOT_STARTED,
   ASSIGNMENT_STATUSES.IN_PROGRESS,
-  ASSIGNMENT_STATUSES.OVERDUE,
   ASSIGNMENT_STATUSES.COMPLETED,
 ];
+const LOCKED = [ASSIGNMENT_STATUSES.SUBMITTED, ASSIGNMENT_STATUSES.GRADED];
 
-const TaskList = ({ tasks, setTasks, setEditingTask, openTaskForm, highlightedTaskId }) => {
+const TaskList = ({ tasks, setTasks, highlightedTaskId }) => {
   const { user } = useAuth();
-  // the confirm dialog config when one is open, or null. each action below just
-  // hands it a title/message and what to run on confirm.
   const [confirm, setConfirm] = useState(null);
+  const authHeader = { headers: { Authorization: `Bearer ${user?.token}` } };
 
-  const submitTask = async (task) => {
+  const updateStatus = async (task, status) => {
     try {
-      const response = await axiosInstance.put(`/tasks/${task._id}/submit`, {}, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      setTasks(tasks.map((t) => (t._id === task._id ? response.data : t)));
+      const res = await axiosInstance.put(`/tasks/${task._id}`, { status }, authHeader);
+      setTasks(tasks.map((t) => (t._id === task._id ? res.data : t)));
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to submit assignment.');
+      alert(error.response?.data?.message || 'Failed to update status.');
     }
   };
 
-  const deleteTask = async (taskId) => {
+  const submitTask = async (task) => {
     try {
-      await axiosInstance.delete(`/tasks/${taskId}`, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      setTasks(tasks.filter((task) => task._id !== taskId));
+      const res = await axiosInstance.put(`/tasks/${task._id}/submit`, {}, authHeader);
+      setTasks(tasks.map((t) => (t._id === task._id ? res.data : t)));
     } catch (error) {
-      alert('Failed to delete assignment.');
+      alert(error.response?.data?.message || 'Failed to submit assignment.');
     }
   };
 
   const askSubmit = (task) =>
     setConfirm({
       title: 'Submit for grading?',
-      message: `"${task.title}" will be sent to your teacher. You won't be able to edit it after this.`,
+      message: `"${task.title}" will be sent to your teacher. You won't be able to change it after this.`,
       confirmLabel: 'Submit',
       variant: 'primary',
       icon: 'send',
       onConfirm: () => submitTask(task),
-    });
-
-  const askDelete = (task) =>
-    setConfirm({
-      title: 'Delete assignment?',
-      message: `"${task.title}" will be permanently removed. This can't be undone.`,
-      confirmLabel: 'Delete',
-      variant: 'danger',
-      icon: 'delete',
-      onConfirm: () => deleteTask(task._id),
     });
 
   if (tasks.length === 0) {
@@ -89,42 +75,81 @@ const TaskList = ({ tasks, setTasks, setEditingTask, openTaskForm, highlightedTa
 
   return (
     <>
-    <div className="flex flex-col gap-md">
-      {tasks.map((task) => {
-        const isHighlighted = task._id === highlightedTaskId;
-        return (
-          <div
-            key={task._id}
-            className={`bg-surface-container-lowest border rounded-xl p-md flex flex-col md:flex-row md:items-center gap-md transition-all ${
-              isHighlighted ? 'border-primary ring-2 ring-primary/20' : 'border-outline-variant'
-            }`}
-          >
-            <div className="flex-1 min-w-0">
-              <h4 className="font-title-lg text-title-lg text-on-surface">{task.title}</h4>
-              <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-xs">
-                {task.description || 'No description'}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-lg">
-              <div className="min-w-[110px]">
-                <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">Subject</span>
-                <span className="font-body-sm text-body-sm text-on-surface flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[16px] text-on-surface-variant">school</span>
-                  {task.subject?.name || 'No subject'}
-                </span>
+      <div className="flex flex-col gap-md">
+        {tasks.map((task) => {
+          const isHighlighted = task._id === highlightedTaskId;
+          const locked = LOCKED.includes(task.status);
+          return (
+            <div
+              key={task._id}
+              className={`bg-surface-container-lowest border rounded-xl p-md flex flex-col md:flex-row md:items-center gap-md transition-all ${
+                isHighlighted ? 'border-primary ring-2 ring-primary/20' : 'border-outline-variant'
+              }`}
+            >
+              <div className="flex-1 min-w-0">
+                <h4 className="font-title-lg text-title-lg text-on-surface">{task.title}</h4>
+                <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-xs">
+                  {task.description || 'No description'}
+                </p>
               </div>
 
-              <div className="min-w-[100px]">
-                <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">Due date</span>
-                <span className="font-body-sm text-body-sm text-on-surface">{new Date(task.deadline).toLocaleDateString()}</span>
+              <div className="flex items-center gap-lg">
+                <div className="min-w-[110px]">
+                  <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">Subject</span>
+                  <span className="font-body-sm text-body-sm text-on-surface flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[16px] text-on-surface-variant">school</span>
+                    {task.subject?.name || 'No subject'}
+                  </span>
+                </div>
+
+                <div className="min-w-[100px]">
+                  <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">Due date</span>
+                  <span className="font-body-sm text-body-sm text-on-surface">{new Date(task.deadline).toLocaleDateString()}</span>
+                </div>
+
+                <div className="min-w-[110px]">
+                  <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">Status</span>
+                  <span className={`inline-block font-label-sm text-label-sm px-2 py-1 rounded-full whitespace-nowrap ${STATUS_BADGE[task.status] || STATUS_BADGE[ASSIGNMENT_STATUSES.NOT_STARTED]}`}>
+                    {task.status}
+                  </span>
+                </div>
               </div>
 
-              <div className="min-w-[110px]">
-                <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">Status</span>
-                <span className={`inline-block font-label-sm text-label-sm px-2 py-1 rounded-full whitespace-nowrap ${STATUS_BADGE[task.status] || STATUS_BADGE[ASSIGNMENT_STATUSES.NOT_STARTED]}`}>
-                  {task.status}
-                </span>
+              <div className="flex items-center gap-sm">
+                {task.status === ASSIGNMENT_STATUSES.GRADED ? (
+                  <Link
+                    to="/grades"
+                    className="px-md py-xs rounded-lg border border-outline-variant text-primary font-label-md text-label-md hover:bg-surface-container-low transition-colors whitespace-nowrap"
+                  >
+                    View grade
+                  </Link>
+                ) : locked ? (
+                  <span className="font-body-sm text-body-sm text-on-surface-variant italic">Awaiting grade</span>
+                ) : (
+                  <>
+                    <select
+                      value={SETTABLE.includes(task.status) ? task.status : ''}
+                      onChange={(e) => updateStatus(task, e.target.value)}
+                      className="px-sm py-xs bg-surface-container-lowest border border-outline-variant rounded-lg font-label-sm text-label-sm text-on-surface focus:ring-2 focus:ring-primary outline-none"
+                      title="Update progress"
+                    >
+                      {!SETTABLE.includes(task.status) && (
+                        <option value="" disabled>{task.status}</option>
+                      )}
+                      {SETTABLE.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => askSubmit(task)}
+                      title="Submit for grading"
+                      className="inline-flex items-center gap-xs px-md py-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 transition-opacity whitespace-nowrap"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">send</span>
+                      Submit
+                    </button>
+                  </>
+                )}
               </div>
               <div className="min-w-[110px]">
                 <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">Priority</span>
@@ -133,41 +158,11 @@ const TaskList = ({ tasks, setTasks, setEditingTask, openTaskForm, highlightedTa
                 </span>
               </div>
             </div>
+          );
+        })}
+      </div>
 
-            <div className="flex gap-sm md:flex-col lg:flex-row">
-              {SUBMITTABLE.includes(task.status) && (
-                <button
-                  onClick={() => askSubmit(task)}
-                  title="Submit for grading"
-                  className="p-xs rounded-lg border border-primary text-primary hover:bg-primary hover:text-on-primary transition-all"
-                >
-                  <span className="material-symbols-outlined text-[20px]">send</span>
-                </button>
-              )}
-              <button
-                onClick={() => {
-                  setEditingTask(task);
-                  openTaskForm();
-                }}
-                title="Edit assignment"
-                className="p-xs rounded-lg border border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary transition-all"
-              >
-                <span className="material-symbols-outlined text-[20px]">edit</span>
-              </button>
-              <button
-                onClick={() => askDelete(task)}
-                title="Delete assignment"
-                className="p-xs rounded-lg border border-outline-variant text-error hover:bg-error-container hover:border-error transition-all"
-              >
-                <span className="material-symbols-outlined text-[20px]">delete</span>
-              </button>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-
-    {confirm && <ConfirmDialog {...confirm} onClose={() => setConfirm(null)} />}
+      {confirm && <ConfirmDialog {...confirm} onClose={() => setConfirm(null)} />}
     </>
   );
 };
