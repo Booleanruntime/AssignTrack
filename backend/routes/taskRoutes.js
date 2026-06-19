@@ -6,6 +6,8 @@ const { protect } = require('../middleware/authMiddleware');
 const { UserFactory } = require('../factories/UserFactory');
 const { getAssignmentState } = require('../states/AssignmentState');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
+const ArchiveAssignmentCommand = require('../commands/ArchiveAssignmentCommand');
+const RestoreAssignmentCommand = require('../commands/RestoreAssignmentCommand');
 
 router.get('/', protect, async (req, res) => {
   try {
@@ -88,25 +90,68 @@ router.put('/:id/submit', protect, async (req, res) => {
   }
 });
 
-// a student updates their own progress on an assigned task. the title, deadline
-// and subject belong to the teacher's assignment, so this only moves the status -
-// and only between the states a student is allowed to set by hand. Submitted and
-// Graded are reached through the submit and grade flows, not here.
+// a student archives their own assignment from the active tracker without deleting it
+router.put('/:id/archive', protect, async (req, res) => {
+  try {
+    const command = new ArchiveAssignmentCommand(req.params.id, req.user._id);
+    const task = await command.execute();
+
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    res.json(task);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to archive task' });
+  }
+});
+
+// a student restores their own assignment from the archived list back to the active tracker
+router.put('/:id/restore', protect, async (req, res) => {
+  try {
+    const command = new RestoreAssignmentCommand(req.params.id, req.user._id);
+    const task = await command.execute();
+
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    res.json(task);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to restore task' });
+  }
+});
+
+// a student updates their own tracking fields on an assigned task. the title,
+// deadline and subject belong to the teacher's assignment, so students can only
+// change personal progress information such as status and priority. Submitted
+// and Graded are reached through the submit and grade flows, not here.
 router.put('/:id', protect, async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, priority } = req.body;
     const studentSettable = [
       ASSIGNMENT_STATUSES.NOT_STARTED,
       ASSIGNMENT_STATUSES.IN_PROGRESS,
       ASSIGNMENT_STATUSES.COMPLETED,
     ];
+    const studentSettablePriorities = ['Low', 'Medium', 'High'];
     if (!studentSettable.includes(status)) {
-      return res.status(400).json({ message: 'Status must be Not Started, In Progress or Completed' });
+      return res.status(400).json({ 
+        message: 'Status must be Not Started, In Progress or Completed',
+
+       });
+    }
+
+    if (!studentSettablePriorities.includes(priority)) {
+      return res.status(400).json({ 
+        message: 'Priority must be Low, Medium or High',
+
+       });
     }
 
     const task = await Task.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
-      { status },
+      { status, priority },
       { new: true, runValidators: true }
     ).populate('subject');
 
