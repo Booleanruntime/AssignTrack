@@ -27,9 +27,10 @@ const Subjects = () => {
       console.log('No user token yet');
       return;
     }
+    const headers = { headers: { Authorization: `Bearer ${user.token}` } };
     const fetchSubjects = async () => {
       try {
-        const response = await axiosInstance.get('/subjects', authHeader);
+        const response = await axiosInstance.get('/subjects', headers);
         setSubjects(response.data);
       } catch (error) {
         console.error('Failed to fetch subjects:', error.response?.data || error.message);
@@ -38,7 +39,7 @@ const Subjects = () => {
     };
     const fetchTeachers = async () => {
       try {
-        const response = await axiosInstance.get('/auth/users?role=teacher', authHeader);
+        const response = await axiosInstance.get('/auth/users?role=teacher', headers);
         setTeachers(response.data);
       } catch (error) {
         console.error('Failed to fetch teachers:', error.response?.data || error.message);
@@ -46,7 +47,7 @@ const Subjects = () => {
     };
     const fetchStudents = async () => {
       try {
-        const response = await axiosInstance.get('/auth/users?role=student', authHeader);
+        const response = await axiosInstance.get('/auth/users?role=student', headers);
         setStudents(response.data);
       } catch (error) {
         console.error('Failed to fetch students:', error.response?.data || error.message);

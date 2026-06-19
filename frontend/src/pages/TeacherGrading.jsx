@@ -13,9 +13,10 @@ const TeacherGrading = () => {
 
   useEffect(() => {
     if (!user?.token) return;
+    const headers = { headers: { Authorization: `Bearer ${user.token}` } };
     const fetchGradeable = async () => {
       try {
-        const response = await axiosInstance.get('/tasks/gradeable', authHeader);
+        const response = await axiosInstance.get('/tasks/gradeable', headers);
         setTasks(response.data);
       } catch (error) {
         console.error('Failed to fetch gradeable tasks:', error.response?.data || error.message);
