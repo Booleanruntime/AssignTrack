@@ -6,6 +6,9 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Tasks from './pages/Tasks';
 import Subjects from './pages/Subjects';
+import TeacherGrading from './pages/TeacherGrading';
+import TeacherAssignments from './pages/TeacherAssignments';
+import StudentGrades from './pages/StudentGrades';
 
 function App() {
   return (
@@ -17,6 +20,9 @@ function App() {
         <Route path="/dashboard" element={<AppLayout><Dashboard /></AppLayout>} />
         <Route path="/tasks" element={<AppLayout><Tasks /></AppLayout>} />
         <Route path="/subjects" element={<AppLayout><Subjects /></AppLayout>} />
+        <Route path="/teacher/grading" element={<AppLayout><TeacherGrading /></AppLayout>} />
+        <Route path="/teacher/assignments" element={<AppLayout><TeacherAssignments /></AppLayout>} />
+        <Route path="/grades" element={<AppLayout><StudentGrades /></AppLayout>} />
         <Route path="/profile" element={<AppLayout><Profile /></AppLayout>} />
       </Routes>
     </Router>

@@ -31,7 +31,18 @@ const taskSchema = new mongoose.Schema(
       type: String,
       enum: Object.values(ASSIGNMENT_STATUSES),
       default: ASSIGNMENT_STATUSES.NOT_STARTED,
-    }
+    },
+    priority: {
+      type: String,
+      enum: ['Low', 'Medium', 'High'],
+      default: 'Low'
+    },
+    // the teacher-authored assignment this instance was fanned out from. legacy
+    // tasks created before the teacher-authored model won't have one.
+    assignment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Assignment',
+    },
   },
   { timestamps: true }
 );

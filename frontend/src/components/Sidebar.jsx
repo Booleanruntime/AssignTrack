@@ -1,6 +1,27 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+// Nav is per-role: each role only sees the routes that mean something to it.
+// Students do assigned work, teachers author + grade it, admins set up the world.
+const NAV_BY_ROLE = {
+  student: [
+    { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
+    { to: '/tasks', label: 'Assignments', icon: 'assignment' },
+    { to: '/grades', label: 'My Grades', icon: 'grade' },
+    { to: '/profile', label: 'Profile', icon: 'account_circle' },
+  ],
+  teacher: [
+    { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
+    { to: '/teacher/assignments', label: 'Assignments', icon: 'assignment' },
+    { to: '/teacher/grading', label: 'Grading', icon: 'grading' },
+    { to: '/profile', label: 'Profile', icon: 'account_circle' },
+  ],
+  admin: [
+    { to: '/subjects', label: 'Subjects', icon: 'menu_book' },
+    { to: '/profile', label: 'Profile', icon: 'account_circle' },
+  ],
+};
+
 const Sidebar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -11,15 +32,7 @@ const Sidebar = () => {
     navigate('/login');
   };
 
-  // Each nav item is a route + the Material Symbol that fronts it. Subjects is
-  // gated to admins below since students never see the catalog.
-  const navItems = [
-    { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
-    { to: '/tasks', label: 'Assignments', icon: 'assignment' },
-    { to: '/subjects', label: 'Subjects', icon: 'menu_book', adminOnly: true },
-    { to: '/profile', label: 'Profile', icon: 'account_circle' },
-  ];
-
+  const navItems = NAV_BY_ROLE[user?.role] || NAV_BY_ROLE.student;
   const isActive = (to) => location.pathname === to;
 
   const linkClass = (to) =>
@@ -36,25 +49,26 @@ const Sidebar = () => {
         <p className="font-label-sm text-label-sm text-on-surface-variant mt-xs">Academic Workspace</p>
       </div>
 
-      <div className="mb-lg px-md">
-        <button
-          onClick={() => navigate('/tasks', { state: { openForm: true } })}
-          className="w-full bg-primary text-on-primary font-label-md text-label-md py-sm px-md rounded-lg flex items-center justify-center gap-sm hover:opacity-90 transition-opacity"
-        >
-          <span className="material-symbols-outlined text-[18px]">add</span>
-          New Assignment
-        </button>
-      </div>
+      {/* Only teachers author assignments, so the primary "create" action is theirs. */}
+      {user?.role === 'teacher' && (
+        <div className="mb-lg px-md">
+          <button
+            onClick={() => navigate('/teacher/assignments', { state: { openForm: true } })}
+            className="w-full bg-primary text-on-primary font-label-md text-label-md py-sm px-md rounded-lg flex items-center justify-center gap-sm hover:opacity-90 transition-opacity"
+          >
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            New Assignment
+          </button>
+        </div>
+      )}
 
       <nav className="flex-1 flex flex-col gap-xs">
-        {navItems
-          .filter((item) => !item.adminOnly || user?.role === 'admin')
-          .map((item) => (
-            <Link key={item.to} to={item.to} className={linkClass(item.to)}>
-              <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-              {item.label}
-            </Link>
-          ))}
+        {navItems.map((item) => (
+          <Link key={item.to} to={item.to} className={linkClass(item.to)}>
+            <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+            {item.label}
+          </Link>
+        ))}
       </nav>
 
       <div className="mt-auto flex flex-col gap-xs pt-md border-t border-outline-variant">

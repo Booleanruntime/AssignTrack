@@ -7,6 +7,8 @@ const SubjectList = ({
   handleUpdateSubject,
   handleDeleteSubject,
   setEditingSubject,
+  startManagingTeachers,
+  startEnrollingStudents,
 }) => {
   return (
     <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
@@ -34,6 +36,25 @@ const SubjectList = ({
             >
               <div className="col-span-4">
                 <span className="font-title-lg text-title-lg text-on-surface">{subject.name}</span>
+                <div className="flex flex-wrap gap-xs mt-xs">
+                  {(subject.teachers || []).length === 0 ? (
+                    <span className="font-body-sm text-body-sm text-on-surface-variant italic">No teachers assigned</span>
+                  ) : (
+                    subject.teachers.map((teacher) => (
+                      <span
+                        key={teacher._id || teacher}
+                        className="inline-flex items-center gap-xs px-sm py-[2px] rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">school</span>
+                        {teacher.name || 'Teacher'}
+                      </span>
+                    ))
+                  )}
+                  <span className="inline-flex items-center gap-xs px-sm py-[2px] rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm">
+                    <span className="material-symbols-outlined text-[14px]">groups</span>
+                    {(subject.students || []).length} enrolled
+                  </span>
+                </div>
               </div>
 
               <div className="col-span-5 pr-md">
@@ -74,6 +95,20 @@ const SubjectList = ({
                   </>
                 ) : (
                   <div className="flex gap-sm opacity-0 group-hover:opacity-100 transition-opacity focus-within:opacity-100">
+                    <button
+                      onClick={() => startManagingTeachers(subject)}
+                      title="Assign Teachers"
+                      className="p-xs rounded-lg border border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary transition-all bg-surface-container-lowest"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">group</span>
+                    </button>
+                    <button
+                      onClick={() => startEnrollingStudents(subject)}
+                      title="Enrol Students"
+                      className="p-xs rounded-lg border border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary transition-all bg-surface-container-lowest"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">groups</span>
+                    </button>
                     <button
                       onClick={() => startEditingSubject(subject)}
                       title="Edit Description"
