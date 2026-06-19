@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import SubjectForm from '../components/SubjectForm';
 import SubjectList from '../components/SubjectList';
 import TeacherAssignmentModal from '../components/TeacherAssignmentModal';
+import StudentEnrollmentModal from '../components/StudentEnrollmentModal';
 import CreateTeacherForm from '../components/CreateTeacherForm';
 
 const Subjects = () => {
@@ -13,7 +14,9 @@ const Subjects = () => {
   const [editDescription, setEditDescription] = useState('');
   const [showSubjectForm, setShowSubjectForm] = useState(false);
   const [teachers, setTeachers] = useState([]);
+  const [students, setStudents] = useState([]);
   const [managingSubject, setManagingSubject] = useState(null);
+  const [enrollingSubject, setEnrollingSubject] = useState(null);
   const [showTeacherForm, setShowTeacherForm] = useState(false);
   const subjectFormRef = useRef(null);
 
@@ -41,8 +44,17 @@ const Subjects = () => {
         console.error('Failed to fetch teachers:', error.response?.data || error.message);
       }
     };
+    const fetchStudents = async () => {
+      try {
+        const response = await axiosInstance.get('/auth/users?role=student', authHeader);
+        setStudents(response.data);
+      } catch (error) {
+        console.error('Failed to fetch students:', error.response?.data || error.message);
+      }
+    };
     fetchSubjects();
     fetchTeachers();
+    fetchStudents();
   }, [user]);
 
   const handleSaveTeachers = async (subjectId, teacherIds) => {
@@ -55,6 +67,19 @@ const Subjects = () => {
       setSubjects(subjects.map((s) => (s._id === response.data._id ? response.data : s)));
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to assign teachers.');
+    }
+  };
+
+  const handleSaveStudents = async (subjectId, studentIds) => {
+    try {
+      const response = await axiosInstance.put(
+        `/subjects/${subjectId}/students`,
+        { studentIds },
+        authHeader
+      );
+      setSubjects(subjects.map((s) => (s._id === response.data._id ? response.data : s)));
+    } catch (error) {
+      alert(error.response?.data?.message || 'Failed to enrol students.');
     }
   };
 
@@ -168,6 +193,7 @@ const Subjects = () => {
         handleDeleteSubject={handleDeleteSubject}
         setEditingSubject={setEditingSubject}
         startManagingTeachers={setManagingSubject}
+        startEnrollingStudents={setEnrollingSubject}
       />
 
       {managingSubject && (
@@ -176,6 +202,15 @@ const Subjects = () => {
           allTeachers={teachers}
           onSave={handleSaveTeachers}
           onClose={() => setManagingSubject(null)}
+        />
+      )}
+
+      {enrollingSubject && (
+        <StudentEnrollmentModal
+          subject={enrollingSubject}
+          allStudents={students}
+          onSave={handleSaveStudents}
+          onClose={() => setEnrollingSubject(null)}
         />
       )}
     </>

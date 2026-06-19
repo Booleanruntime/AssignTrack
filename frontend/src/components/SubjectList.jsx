@@ -8,6 +8,7 @@ const SubjectList = ({
   handleDeleteSubject,
   setEditingSubject,
   startManagingTeachers,
+  startEnrollingStudents,
 }) => {
   return (
     <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
@@ -49,6 +50,10 @@ const SubjectList = ({
                       </span>
                     ))
                   )}
+                  <span className="inline-flex items-center gap-xs px-sm py-[2px] rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm">
+                    <span className="material-symbols-outlined text-[14px]">groups</span>
+                    {(subject.students || []).length} enrolled
+                  </span>
                 </div>
               </div>
 
@@ -96,6 +101,13 @@ const SubjectList = ({
                       className="p-xs rounded-lg border border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary transition-all bg-surface-container-lowest"
                     >
                       <span className="material-symbols-outlined text-[20px]">group</span>
+                    </button>
+                    <button
+                      onClick={() => startEnrollingStudents(subject)}
+                      title="Enrol Students"
+                      className="p-xs rounded-lg border border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary transition-all bg-surface-container-lowest"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">groups</span>
                     </button>
                     <button
                       onClick={() => startEditingSubject(subject)}
