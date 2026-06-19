@@ -40,10 +40,12 @@ const AssignmentFilters = ({
       </div>
 
       <div className="flex-1">
-        <label className={labelClass} htmlFor="sort-order">Sort by Due Date</label>
+        <label className={labelClass} htmlFor="sort-order">Sort by</label>
         <select id="sort-order" className={selectClass} value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
-          <option value="asc">Earliest First</option>
-          <option value="desc">Latest First</option>
+          <option value="asc">Due Date: Earliest First</option>
+          <option value="desc">Due Date: Latest First</option>
+          <option value="priority-desc">Priority: High to Low</option>
+          <option value="priority-asc">Priority: Low to High</option>
         </select>
       </div>
     </div>

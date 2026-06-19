@@ -14,7 +14,7 @@ router.get('/', protect, async (req, res) => {
 
 router.post('/', protect, async (req, res) => {
   try {
-    const { title, description, deadline, status, subject } = req.body;
+    const { title, description, deadline, status, subject, priority } = req.body;
 
     const task = await Task.create({
       title,
@@ -22,6 +22,7 @@ router.post('/', protect, async (req, res) => {
       deadline,
       status,
       subject,
+      priority,
       user: req.user._id,
     });
     const populatedTask = await task.populate('subject');
@@ -33,11 +34,11 @@ router.post('/', protect, async (req, res) => {
 
 router.put('/:id', protect, async (req, res) => {
   try {
-    const { title, description, deadline, status, subject } = req.body;
+    const { title, description, deadline, status, subject, priority } = req.body;
 
     const task = await Task.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
-      { title, description, deadline, status, subject },
+      { title, description, deadline, status, subject, priority },
       { new: true, runValidators: true }
     ).populate('subject');
 

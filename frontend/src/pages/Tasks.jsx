@@ -6,6 +6,7 @@ import TaskList from '../components/TaskList';
 import { useAuth } from '../context/AuthContext';
 import AssignmentStats from '../components/AssignmentStats';
 import AssignmentFilters from '../components/AssignmentFilters';
+import { getAssignmentSortStrategy } from '../utils/assignmentSortStrategies';
 
 const Tasks = () => {
   const { user } = useAuth();
@@ -70,11 +71,7 @@ const Tasks = () => {
       if (!search.trim()) return true;
       return task.title.toLowerCase().includes(search.trim().toLowerCase());
     })
-    .sort((a, b) => {
-      const dateA = new Date(a.deadline);
-      const dateB = new Date(b.deadline);
-      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
-    });
+    .sort(getAssignmentSortStrategy(sortOrder));
 
   const openTaskForm = () => {
     setShowTaskForm(true);

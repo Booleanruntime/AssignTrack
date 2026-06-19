@@ -9,6 +9,7 @@ const emptyFormData = {
   deadline: '',
   subject: '',
   status: ASSIGNMENT_STATUSES.NOT_STARTED,
+  priority: 'Low',
 };
 
 const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects, setShowTaskForm, setHighlightedTaskId }) => {
@@ -23,6 +24,7 @@ const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects, setS
         deadline: editingTask.deadline?.slice(0, 10),
         subject: editingTask.subject?._id || editingTask.subject || '',
         status: editingTask.status || ASSIGNMENT_STATUSES.NOT_STARTED,
+        priority: editingTask.priority || 'Low',
       });
     } else {
       setFormData(emptyFormData);
@@ -97,7 +99,7 @@ const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects, setS
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-md">
           <div>
             <label className={labelClass} htmlFor="task-deadline">Due Date</label>
             <input
@@ -109,6 +111,23 @@ const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask, subjects, setS
               required
             />
           </div>
+
+          <div>
+            <label className={labelClass} htmlFor="task-priority">Priority</label>
+            <select
+              id="task-priority"
+              className={inputClass}
+              value={formData.priority}
+              onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+              required
+            >
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+          </div>
+
+
 
           <div>
             <label className={labelClass} htmlFor="task-subject">Subject</label>

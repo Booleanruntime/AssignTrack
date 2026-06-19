@@ -31,6 +31,11 @@ const taskSchema = new mongoose.Schema(
       type: String,
       enum: Object.values(ASSIGNMENT_STATUSES),
       default: ASSIGNMENT_STATUSES.NOT_STARTED,
+    },
+    priority: {
+      type: String,
+      enum: ['Low', 'Medium', 'High'],
+      default: 'Low'
     }
   },
   { timestamps: true }
