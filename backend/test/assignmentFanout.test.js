@@ -3,6 +3,7 @@ const sinon = require('sinon');
 const Assignment = require('../models/Assignment');
 const Task = require('../models/Task');
 const Subject = require('../models/Subject');
+const ActivityLogService = require('../services/ActivityLogService');
 const { createAssignment, instancesFor } = require('../controllers/assignmentController');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
 
@@ -35,12 +36,20 @@ describe('Assignment fan-out', () => {
         sinon.stub(Subject, 'findById').resolves({ _id: 'subj1', teachers: ['teacher1'], students: ['s1', 's2'] });
         sinon.stub(Assignment, 'create').resolves({ _id: 'a1', toObject: () => ({ _id: 'a1', title: 'Essay' }) });
         const insert = sinon.stub(Task, 'insertMany').resolves([]);
+        const activity = sinon.stub(ActivityLogService, 'recordActivity').resolves();
         const res = makeRes();
 
         await createAssignment({ user: teacher, body }, res);
 
         expect(insert.calledOnce).to.equal(true);
         expect(insert.firstCall.args[0]).to.have.length(2);
+        expect(activity.calledOnce).to.equal(true);
+        expect(activity.firstCall.args[0]).to.include({
+            actor: teacher._id,
+            action: 'assignment.created',
+            entityType: 'Assignment',
+            entityId: 'a1',
+        });
         expect(res.status.calledWith(201)).to.equal(true);
     });
 
