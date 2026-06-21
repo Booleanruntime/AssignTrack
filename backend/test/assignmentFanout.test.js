@@ -3,6 +3,7 @@ const sinon = require('sinon');
 const Assignment = require('../models/Assignment');
 const Task = require('../models/Task');
 const Subject = require('../models/Subject');
+const NotificationService = require('../services/NotificationService');
 const ActivityLogService = require('../services/ActivityLogService');
 const { createAssignment, instancesFor } = require('../controllers/assignmentController');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
@@ -35,7 +36,13 @@ describe('Assignment fan-out', () => {
     it('creates the assignment and fans out a task per enrolled student', async () => {
         sinon.stub(Subject, 'findById').resolves({ _id: 'subj1', teachers: ['teacher1'], students: ['s1', 's2'] });
         sinon.stub(Assignment, 'create').resolves({ _id: 'a1', toObject: () => ({ _id: 'a1', title: 'Essay' }) });
-        const insert = sinon.stub(Task, 'insertMany').resolves([]);
+
+        const insert = sinon.stub(Task, 'insertMany').resolves([
+            { _id: 'task1', user: 's1' },
+            { _id: 'task2', user: 's2' },
+        ]);
+
+        const notifications = sinon.stub(NotificationService, 'createMany').resolves([]);
         const activity = sinon.stub(ActivityLogService, 'recordActivity').resolves();
         const res = makeRes();
 
@@ -43,6 +50,17 @@ describe('Assignment fan-out', () => {
 
         expect(insert.calledOnce).to.equal(true);
         expect(insert.firstCall.args[0]).to.have.length(2);
+
+        expect(notifications.calledOnce).to.equal(true);
+        expect(notifications.firstCall.args[0]).to.have.length(2);
+        expect(notifications.firstCall.args[0][0]).to.include({
+            recipient: 's1',
+            type: 'assignment.created',
+            title: 'New assignment',
+            assignment: 'a1',
+            task: 'task1',
+        });
+
         expect(activity.calledOnce).to.equal(true);
         expect(activity.firstCall.args[0]).to.include({
             actor: teacher._id,
@@ -50,6 +68,7 @@ describe('Assignment fan-out', () => {
             entityType: 'Assignment',
             entityId: 'a1',
         });
+
         expect(res.status.calledWith(201)).to.equal(true);
     });
 

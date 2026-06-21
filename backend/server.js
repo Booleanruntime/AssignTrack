@@ -24,6 +24,7 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/subjects', subjectRoutes);
 app.use('/api/grades', require('./routes/gradeRoutes'));
 app.use('/api/assignments', require('./routes/assignmentRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/activity-logs', require('./routes/activityLogRoutes'));
 console.log('Subject routes registered');
 
