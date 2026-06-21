@@ -10,6 +10,7 @@ import TeacherGrading from './pages/TeacherGrading';
 import TeacherAssignments from './pages/TeacherAssignments';
 import StudentGrades from './pages/StudentGrades';
 import Notifications from './pages/Notifications';
+import ActivityLog from './pages/ActivityLog';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/teacher/assignments" element={<AppLayout><TeacherAssignments /></AppLayout>} />
         <Route path="/grades" element={<AppLayout><StudentGrades /></AppLayout>} />
         <Route path="/notifications" element={<AppLayout><Notifications /></AppLayout>} />
+        <Route path="/activity-log" element={<AppLayout><ActivityLog /></AppLayout>} />
         <Route path="/profile" element={<AppLayout><Profile /></AppLayout>} />
       </Routes>
     </Router>

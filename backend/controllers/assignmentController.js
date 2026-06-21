@@ -5,6 +5,7 @@ const Logger = require('../utils/Logger');
 const { UserFactory } = require('../factories/UserFactory');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
 const NotificationService = require('../services/NotificationService');
+const ActivityLogService = require('../services/ActivityLogService');
 
 const logger = Logger.getInstance();
 
@@ -67,6 +68,18 @@ const createAssignment = async (req, res) => {
                 },
             })));
         }
+
+        await ActivityLogService.recordActivity({
+            actor: req.user._id,
+            action: 'assignment.created',
+            entityType: 'Assignment',
+            entityId: assignment._id,
+            message: `${req.user.email} created assignment "${title}"`,
+            metadata: {
+                subject: subject._id,
+                assignedTo: instances.length,
+            },
+        });
 
         logger.info(`${req.user.email} created assignment "${title}" → ${instances.length} student(s)`);
         res.status(201).json({ ...assignment.toObject(), assignedTo: instances.length });
@@ -137,6 +150,17 @@ const updateAssignment = async (req, res) => {
             { title: saved.title, description: saved.description, deadline: saved.deadline }
         );
 
+        await ActivityLogService.recordActivity({
+            actor: req.user._id,
+            action: 'assignment.updated',
+            entityType: 'Assignment',
+            entityId: assignment._id,
+            message: `${req.user.email} updated assignment "${saved.title}"`,
+            metadata: {
+                subject: saved.subject,
+            },
+        });
+
         logger.info(`${req.user.email} edited assignment ${assignment._id} (propagated to instances)`);
         res.json(saved);
     } catch (error) {
@@ -157,6 +181,17 @@ const deleteAssignment = async (req, res) => {
 
         await Task.deleteMany({ assignment: assignment._id });
         await assignment.deleteOne();
+
+        await ActivityLogService.recordActivity({
+            actor: req.user._id,
+            action: 'assignment.deleted',
+            entityType: 'Assignment',
+            entityId: assignment._id,
+            message: `${req.user.email} deleted assignment "${assignment.title}"`,
+            metadata: {
+                subject: assignment.subject,
+            },
+        });
 
         logger.info(`${req.user.email} deleted assignment ${assignment._id} and its instances`);
         res.json({ message: 'Assignment deleted' });

@@ -3,12 +3,10 @@ const sinon = require('sinon');
 const Grade = require('../models/Grade');
 const Task = require('../models/Task');
 const NotificationService = require('../services/NotificationService');
+const ActivityLogService = require('../services/ActivityLogService');
 const { createGrade } = require('../controllers/gradeController');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
 
-// the gate that ties grading to the assignment lifecycle: a teacher can only
-// grade once the student has submitted. these stay pure unit tests - Task and
-// Grade are stubbed so nothing touches the database.
 describe('createGrade submission gate', () => {
     const teacher = { _id: 'teacher1', email: 'tara@uni.edu', role: 'teacher' };
     const validBody = { taskId: 'task1', scheme: 'percentage', rubric: [{ criterion: 'Design', score: 8, outOf: 10 }] };
@@ -40,11 +38,13 @@ describe('createGrade submission gate', () => {
         sinon.stub(Task, 'findById').resolves(task);
         const gradeCreate = sinon.stub(Grade, 'create').resolves({ _id: 'grade1', label: '80%' });
         const notification = sinon.stub(NotificationService, 'createNotification').resolves({ _id: 'n1' });
+        const activity = sinon.stub(ActivityLogService, 'recordActivity').resolves();
         const res = makeRes();
 
         await createGrade({ user: teacher, body: validBody }, res);
 
         expect(gradeCreate.calledOnce).to.equal(true);
+
         expect(notification.calledOnce).to.equal(true);
         expect(notification.firstCall.args[0]).to.include({
             recipient: 'student1',
@@ -53,6 +53,15 @@ describe('createGrade submission gate', () => {
             task: 'task1',
             grade: 'grade1',
         });
+
+        expect(activity.calledOnce).to.equal(true);
+        expect(activity.firstCall.args[0]).to.include({
+            actor: teacher._id,
+            action: 'grade.created',
+            entityType: 'Grade',
+            entityId: 'grade1',
+        });
+
         expect(task.status).to.equal(ASSIGNMENT_STATUSES.GRADED);
         expect(task.save.calledOnce).to.equal(true);
         expect(res.status.calledWith(201)).to.equal(true);

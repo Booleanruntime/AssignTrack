@@ -8,6 +8,7 @@ const computeOverall = require('../utils/computeOverall');
 const { getAssignmentState } = require('../states/AssignmentState');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
 const NotificationService = require('../services/NotificationService');
+const ActivityLogService = require('../services/ActivityLogService');
 
 const logger = Logger.getInstance();
 
@@ -77,6 +78,21 @@ const createGrade = async (req, res) => {
             },
         });
 
+        await ActivityLogService.recordActivity({
+            actor: req.user._id,
+            action: 'grade.created',
+            entityType: 'Grade',
+            entityId: grade._id,
+            message: `${req.user.email} graded task ${taskId}: ${label}`,
+            metadata: {
+                task: task._id,
+                student: task.user,
+                subject: task.subject,
+                score,
+                label,
+            },
+        });
+
         logger.info(`${req.user.email} graded task ${taskId}: ${label}`);
         res.status(201).json(grade);
     } catch (error) {
@@ -129,6 +145,20 @@ const updateGrade = async (req, res) => {
         grade.feedback = buildFeedback(req.body);
 
         const updated = await grade.save();
+        await ActivityLogService.recordActivity({
+            actor: req.user._id,
+            action: 'grade.updated',
+            entityType: 'Grade',
+            entityId: grade._id,
+            message: `${req.user.email} updated grade ${grade._id}: ${grade.label}`,
+            metadata: {
+                task: grade.task,
+                student: grade.student,
+                subject: grade.subject,
+                score: grade.score,
+                label: grade.label,
+            },
+        });
         res.json(updated);
     } catch (error) {
         res.status(500).json({ message: error.message });
