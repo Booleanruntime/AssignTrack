@@ -73,4 +73,34 @@ describe('ActivityLogService', () => {
 
     expect(ActivityLog.create.firstCall.args[0].metadata).to.deep.equal({});
   });
+
+  it('lists every activity for admins', async () => {
+    const limit = sinon.stub().resolves([{ _id: 'log1' }]);
+    const sort = sinon.stub().returns({ limit });
+    const populate = sinon.stub().returns({ sort });
+    const find = sinon.stub(ActivityLog, 'find').returns({ populate });
+
+    const logs = await ActivityLogService.listActivities({
+      user: { _id: 'admin1', role: 'admin' },
+    });
+
+    expect(logs).to.deep.equal([{ _id: 'log1' }]);
+    expect(find.calledOnceWith({})).to.equal(true);
+    expect(populate.calledOnceWith('actor', 'name email role')).to.equal(true);
+    expect(sort.calledOnceWith({ createdAt: -1 })).to.equal(true);
+    expect(limit.calledOnceWith(100)).to.equal(true);
+  });
+
+  it('scopes activity to the current actor for non-admins', async () => {
+    const limit = sinon.stub().resolves([]);
+    const sort = sinon.stub().returns({ limit });
+    const populate = sinon.stub().returns({ sort });
+    const find = sinon.stub(ActivityLog, 'find').returns({ populate });
+
+    await ActivityLogService.listActivities({
+      user: { _id: 'student1', role: 'student' },
+    });
+
+    expect(find.calledOnceWith({ actor: 'student1' })).to.equal(true);
+  });
 });

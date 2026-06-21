@@ -8,16 +8,19 @@ const NAV_BY_ROLE = {
     { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
     { to: '/tasks', label: 'Assignments', icon: 'assignment' },
     { to: '/grades', label: 'My Grades', icon: 'grade' },
+    { to: '/activity-log', label: 'Activity Log', icon: 'history' },
     { to: '/profile', label: 'Profile', icon: 'account_circle' },
   ],
   teacher: [
     { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
     { to: '/teacher/assignments', label: 'Assignments', icon: 'assignment' },
     { to: '/teacher/grading', label: 'Grading', icon: 'grading' },
+    { to: '/activity-log', label: 'Activity Log', icon: 'history' },
     { to: '/profile', label: 'Profile', icon: 'account_circle' },
   ],
   admin: [
     { to: '/subjects', label: 'Subjects', icon: 'menu_book' },
+    { to: '/activity-log', label: 'Activity Log', icon: 'history' },
     { to: '/profile', label: 'Profile', icon: 'account_circle' },
   ],
 };
