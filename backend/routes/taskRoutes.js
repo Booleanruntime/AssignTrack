@@ -8,6 +8,7 @@ const { getAssignmentState } = require('../states/AssignmentState');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
 const ArchiveAssignmentCommand = require('../commands/ArchiveAssignmentCommand');
 const RestoreAssignmentCommand = require('../commands/RestoreAssignmentCommand');
+const ActivityLogService = require('../services/ActivityLogService');
 
 router.get('/', protect, async (req, res) => {
   try {
@@ -84,6 +85,18 @@ router.put('/:id/submit', protect, async (req, res) => {
     task.status = ASSIGNMENT_STATUSES.SUBMITTED;
     const saved = await task.save();
     const populated = await saved.populate('subject');
+    await ActivityLogService.recordActivity({
+      actor: req.user._id,
+      action: 'task.submitted',
+      entityType: 'Task',
+      entityId: task._id,
+      message: `${req.user.email} submitted "${task.title}" for grading`,
+      metadata: {
+        status: ASSIGNMENT_STATUSES.SUBMITTED,
+        subject: task.subject,
+        assignment: task.assignment,
+      },
+    });
     res.json(populated);
   } catch (error) {
     res.status(500).json({ message: 'Failed to submit assignment' });
@@ -100,6 +113,18 @@ router.put('/:id/archive', protect, async (req, res) => {
       return res.status(404).json({ message: 'Task not found' });
     }
 
+    await ActivityLogService.recordActivity({
+      actor: req.user._id,
+      action: 'task.archived',
+      entityType: 'Task',
+      entityId: task._id,
+      message: `${req.user.email} archived "${task.title}"`,
+      metadata: {
+        subject: task.subject?._id || task.subject,
+        assignment: task.assignment,
+      },
+    });
+
     res.json(task);
   } catch (error) {
     res.status(500).json({ message: 'Failed to archive task' });
@@ -115,6 +140,18 @@ router.put('/:id/restore', protect, async (req, res) => {
     if (!task) {
       return res.status(404).json({ message: 'Task not found' });
     }
+
+    await ActivityLogService.recordActivity({
+      actor: req.user._id,
+      action: 'task.restored',
+      entityType: 'Task',
+      entityId: task._id,
+      message: `${req.user.email} restored "${task.title}"`,
+      metadata: {
+        subject: task.subject?._id || task.subject,
+        assignment: task.assignment,
+      },
+    });
 
     res.json(task);
   } catch (error) {
@@ -159,6 +196,20 @@ router.put('/:id', protect, async (req, res) => {
       return res.status(404).json({ message: 'Task not found' });
     }
 
+    await ActivityLogService.recordActivity({
+      actor: req.user._id,
+      action: 'task.updated',
+      entityType: 'Task',
+      entityId: task._id,
+      message: `${req.user.email} updated "${task.title}"`,
+      metadata: {
+        status,
+        priority,
+        subject: task.subject?._id || task.subject,
+        assignment: task.assignment,
+      },
+    });
+
     res.json(task);
   } catch (error) {
     res.status(500).json({ message: 'Failed to update task' });
@@ -181,6 +232,18 @@ router.delete('/:id', protect, async (req, res) => {
     if (!task) {
       return res.status(404).json({ message: 'Task not found' });
     }
+
+    await ActivityLogService.recordActivity({
+      actor: req.user._id,
+      action: 'task.deleted',
+      entityType: 'Task',
+      entityId: task._id,
+      message: `${req.user.email} deleted task "${task.title}"`,
+      metadata: {
+        subject: task.subject,
+        assignment: task.assignment,
+      },
+    });
 
     res.json({ message: 'Task deleted successfully' });
   } catch (error) {
