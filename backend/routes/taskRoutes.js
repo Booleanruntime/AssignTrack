@@ -6,10 +6,12 @@ const { protect } = require('../middleware/authMiddleware');
 const { UserFactory } = require('../factories/UserFactory');
 const { getAssignmentState } = require('../states/AssignmentState');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
+const { markOverdueTasks } = require('../services/OverdueTaskService');
 
 router.get('/', protect, async (req, res) => {
   try {
-    const tasks = await Task.find({ user: req.user._id }).populate('subject');;
+    await markOverdueTasks({ userId: req.user._id });
+    const tasks = await Task.find({ user: req.user._id }).populate('subject');
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch tasks' });
