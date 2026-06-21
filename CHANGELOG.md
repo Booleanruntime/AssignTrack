@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Teacher-authored assignments that auto-assign to enrolled students, with teacher authoring page
 - Admin-managed student enrolment in subjects (Proxy-guarded)
 - Role-aware navigation and dashboards for student, teacher and admin
+- Added archive and restore functionality so students can remove assignments from their active tracker without deleting them and vise versa (Command Pattern).
+- Updated assignment list actions to fit edit, archive and submit assignments.
 
 ### Changed
 
