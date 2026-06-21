@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 
-const empty = { title: '', description: '', deadline: '', subject: '' };
+const empty = {
+  title: '',
+  description: '',
+  deadline: '',
+  subject: '',
+  assignmentType: 'standard',
+  questionCount: '',
+  timeLimitMinutes: '',
+  presentationLengthMinutes: '',
+};
 
 // teacher's create/edit form for an assignment. subject can only be one the
 // teacher actually teaches, and there's no status field here - status lives on
@@ -16,6 +25,10 @@ const AssignmentForm = ({ editing, subjects, onSave, onCancel }) => {
         description: editing.description || '',
         deadline: editing.deadline?.slice(0, 10) || '',
         subject: editing.subject?._id || editing.subject || '',
+        assignmentType: editing.assignmentType || 'standard',
+        questionCount: editing.assignmentDetails?.questionCount || '',
+        timeLimitMinutes: editing.assignmentDetails?.timeLimitMinutes || '',
+        presentationLengthMinutes: editing.assignmentDetails?.presentationLengthMinutes || '',
       });
     } else {
       setForm(empty);
@@ -26,6 +39,15 @@ const AssignmentForm = ({ editing, subjects, onSave, onCancel }) => {
     e.preventDefault();
     if (!form.title || !form.description || !form.deadline || !form.subject) {
       alert('Please complete title, description, due date and subject.');
+      return;
+    }
+    if (form.assignmentType === 'quiz' && (!form.questionCount || !form.timeLimitMinutes)) {
+      alert('Please complete number of questions and time limit for quiz assignments.');
+      return;
+    }
+
+    if (form.assignmentType === 'presentation' && !form.presentationLengthMinutes) {
+      alert('Please complete presentation length.');
       return;
     }
     setSaving(true);
@@ -73,7 +95,7 @@ const AssignmentForm = ({ editing, subjects, onSave, onCancel }) => {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
           <div>
             <label className={labelClass} htmlFor="a-deadline">Due Date</label>
             <input
@@ -107,7 +129,75 @@ const AssignmentForm = ({ editing, subjects, onSave, onCancel }) => {
               </p>
             )}
           </div>
+          <div>
+            <label className={labelClass} htmlFor="a-type">Assignment Type</label>
+            <select
+              id="a-type"
+              className={inputClass}
+              value={form.assignmentType}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  assignmentType: e.target.value,
+                  questionCount: '',
+                  timeLimitMinutes: '',
+                  presentationLengthMinutes: '',
+                })
+              }
+              required
+            >
+              <option value="standard">Standard</option>
+              <option value="quiz">Quiz</option>
+              <option value="presentation">Presentation</option>
+            </select>
+          </div>
+
         </div>
+          {form.assignmentType === 'quiz' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+              <div>
+                <label className={labelClass} htmlFor="a-question-count">Number of Questions</label>
+                <input
+                  id="a-question-count"
+                  type="number"
+                  min="0"
+                  className={inputClass}
+                  value={form.questionCount}
+                  onChange={(e) => setForm({ ...form, questionCount: e.target.value })}
+                  placeholder="e.g. 20"
+                />
+              </div>
+
+              <div>
+                <label className={labelClass} htmlFor="a-time-limit">Time Limit Minutes</label>
+                <input
+                  id="a-time-limit"
+                  type="number"
+                  min="0"
+                  className={inputClass}
+                  value={form.timeLimitMinutes}
+                  onChange={(e) => setForm({ ...form, timeLimitMinutes: e.target.value })}
+                  placeholder="e.g. 30"
+                />
+              </div>
+            </div>
+          )}
+
+          {form.assignmentType === 'presentation' && (
+            <div>
+              <label className={labelClass} htmlFor="a-presentation-length">Presentation Length Minutes</label>
+              <input
+                id="a-presentation-length"
+                type="number"
+                min="0"
+                className={inputClass}
+                value={form.presentationLengthMinutes}
+                onChange={(e) => setForm({ ...form, presentationLengthMinutes: e.target.value })}
+                placeholder="e.g. 10"
+              />
+            </div>
+          )}
+        
       </div>
 
       <div className="flex gap-sm mt-lg">

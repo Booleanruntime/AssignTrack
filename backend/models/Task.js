@@ -17,6 +17,16 @@ const taskSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    assignmentType: {
+      type: String,
+      enum: ['standard', 'quiz', 'presentation'],
+      default: 'standard',
+    },
+
+    assignmentDetails: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
