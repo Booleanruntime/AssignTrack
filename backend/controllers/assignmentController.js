@@ -4,6 +4,7 @@ const Subject = require('../models/Subject');
 const Logger = require('../utils/Logger');
 const { UserFactory } = require('../factories/UserFactory');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
+const NotificationService = require('../services/NotificationService');
 
 const logger = Logger.getInstance();
 
@@ -51,7 +52,21 @@ const createAssignment = async (req, res) => {
 
         // fan out to everyone enrolled in the subject
         const instances = instancesFor(assignment, subject);
-        if (instances.length) await Task.insertMany(instances);
+        const insertedTasks = instances.length ? await Task.insertMany(instances) : [];
+        if (insertedTasks.length) {
+            await NotificationService.createMany(insertedTasks.map((task) => ({
+                recipient: task.user,
+                type: 'assignment.created',
+                title: 'New assignment',
+                message: `"${assignment.title}" has been assigned.`,
+                assignment: assignment._id,
+                task: task._id,
+                metadata: {
+                    subject: subject._id,
+                    deadline: assignment.deadline,
+                },
+            })));
+        }
 
         logger.info(`${req.user.email} created assignment "${title}" → ${instances.length} student(s)`);
         res.status(201).json({ ...assignment.toObject(), assignedTo: instances.length });

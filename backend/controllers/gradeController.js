@@ -7,6 +7,7 @@ const FeedbackBuilder = require('../builders/FeedbackBuilder');
 const computeOverall = require('../utils/computeOverall');
 const { getAssignmentState } = require('../states/AssignmentState');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
+const NotificationService = require('../services/NotificationService');
 
 const logger = Logger.getInstance();
 
@@ -62,6 +63,19 @@ const createGrade = async (req, res) => {
         // sees it as marked
         task.status = ASSIGNMENT_STATUSES.GRADED;
         await task.save();
+        await NotificationService.createNotification({
+            recipient: task.user,
+            type: 'grade.created',
+            title: 'Grade posted',
+            message: `Your assignment has been graded: ${label}`,
+            task: task._id,
+            grade: grade._id,
+            metadata: {
+                subject: task.subject,
+                score,
+                label,
+            },
+        });
 
         logger.info(`${req.user.email} graded task ${taskId}: ${label}`);
         res.status(201).json(grade);
