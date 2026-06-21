@@ -38,7 +38,58 @@ const TaskList = ({ tasks, setTasks, highlightedTaskId, showArchived  }) => {
   const [editStatus, setEditStatus] = useState('');
   const [editPriority, setEditPriority] = useState('Low');
   const [menuOpenId, setMenuOpenId] = useState(null);
+  const [detailsTask, setDetailsTask] = useState(null);
   const authHeader = { headers: { Authorization: `Bearer ${user?.token}` } };
+
+  const formatAssignmentType = (type) => {
+  if (!type) return 'Standard';
+  return type.charAt(0).toUpperCase() + type.slice(1);
+};
+
+const renderAssignmentDetails = (task) => {
+  if (task.assignmentType === 'quiz') {
+    return (
+      <>
+        <div>
+          <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">
+            Questions
+          </span>
+          <p className="font-body-md text-body-md text-on-surface">
+            {task.assignmentDetails?.questionCount || 'Not specified'}
+          </p>
+        </div>
+
+        <div>
+          <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">
+            Time Limit
+          </span>
+          <p className="font-body-md text-body-md text-on-surface">
+            {task.assignmentDetails?.timeLimitMinutes
+              ? `${task.assignmentDetails.timeLimitMinutes} minutes`
+              : 'Not specified'}
+          </p>
+        </div>
+      </>
+    );
+  }
+
+  if (task.assignmentType === 'presentation') {
+    return (
+      <div>
+        <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">
+          Presentation Length
+        </span>
+        <p className="font-body-md text-body-md text-on-surface">
+          {task.assignmentDetails?.presentationLengthMinutes
+            ? `${task.assignmentDetails.presentationLengthMinutes} minutes`
+            : 'Not specified'}
+        </p>
+      </div>
+    );
+  }
+
+  return null;
+};
 
   const startEdit = (task) => {
   setEditingId(task._id);
@@ -63,7 +114,9 @@ const TaskList = ({ tasks, setTasks, highlightedTaskId, showArchived  }) => {
         authHeader
       );
 
-      setTasks(tasks.map((t) => (t._id === task._id ? res.data : t)));
+      setTasks((prevTasks) =>
+        prevTasks.map((t) => (t._id === task._id ? res.data : t))
+      );
       cancelEdit();
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to update assignment.');
@@ -73,7 +126,10 @@ const TaskList = ({ tasks, setTasks, highlightedTaskId, showArchived  }) => {
   const submitTask = async (task) => {
     try {
       const res = await axiosInstance.put(`/tasks/${task._id}/submit`, {}, authHeader);
-      setTasks(tasks.map((t) => (t._id === task._id ? res.data : t)));
+
+      setTasks((prevTasks) =>
+        prevTasks.map((t) => (t._id === task._id ? res.data : t))
+      );
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to submit assignment.');
     }
@@ -144,7 +200,7 @@ const askArchive = (task) =>
 
   return (
     <>
-      <div className="flex flex-col gap-md pb-5">
+      <div className="flex flex-col gap-md pb-20">
         {tasks.map((task) => {
           const isHighlighted = task._id === highlightedTaskId;
           const locked = LOCKED.includes(task.status);
@@ -283,6 +339,16 @@ const askArchive = (task) =>
 
                       {menuOpenId === task._id && (
                         <div className="absolute right-0 top-full mt-1 w-40 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-lg z-10 overflow-hidden">
+                          
+                          <button
+                            onClick={() => {
+                              setDetailsTask(task);
+                              setMenuOpenId(null);
+                            }}
+                            className="w-full text-left px-md py-sm font-body-sm text-body-sm text-on-surface hover:bg-surface-container-low transition-colors"
+                          >
+                            View Details
+                          </button>
 
                           {showArchived ? (
                             <button
@@ -332,6 +398,86 @@ const askArchive = (task) =>
         })}
       </div>
 
+        {detailsTask && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-md">
+            <div className="w-full max-w-lg bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg p-lg">
+              <div className="flex items-start justify-between gap-md mb-md">
+                <div>
+                  <h3 className="font-title-lg text-title-lg text-primary">Assignment Details</h3>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant mt-xs">
+                    Full information for this assignment.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setDetailsTask(null)}
+                  title="Close"
+                  className="p-xs rounded-lg border border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary transition-all"
+                >
+                  <span className="material-symbols-outlined text-[20px]">close</span>
+                </button>
+              </div>
+
+              <div className="space-y-md">
+                <div>
+                  <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">
+                    Title
+                  </span>
+                  <p className="font-body-md text-body-md text-on-surface">{detailsTask.title}</p>
+                </div>
+
+                <div>
+                  <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">
+                    Description
+                  </span>
+                  <p className="font-body-md text-body-md text-on-surface">
+                    {detailsTask.description || 'No description'}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+                  <div>
+                    <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">
+                      Subject
+                    </span>
+                    <p className="font-body-md text-body-md text-on-surface">
+                      {detailsTask.subject?.name || 'No subject'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">
+                      Due Date
+                    </span>
+                    <p className="font-body-md text-body-md text-on-surface">
+                      {new Date(detailsTask.deadline).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <div>
+                    <span className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-xs">
+                      Assignment Type
+                    </span>
+                    <p className="font-body-md text-body-md text-on-surface">
+                      {formatAssignmentType(detailsTask.assignmentType)}
+                    </p>
+                  </div>
+
+                  {renderAssignmentDetails(detailsTask)}
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-lg">
+                <button
+                  onClick={() => setDetailsTask(null)}
+                  className="px-md py-sm rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 transition-opacity"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       {confirm && <ConfirmDialog {...confirm} onClose={() => setConfirm(null)} />}
     </>
   );
