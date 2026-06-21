@@ -1,62 +1,56 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const Task = require("../models/Task");
-const Subject = require("../models/Subject");
-const { protect } = require("../middleware/authMiddleware");
-const { UserFactory } = require("../factories/UserFactory");
-const { getAssignmentState } = require("../states/AssignmentState");
-const { ASSIGNMENT_STATUSES } = require("../constants/assignmentStatuses");
-const { markOverdueTasks } = require("../services/OverdueTaskService");
-const ArchiveAssignmentCommand = require("../commands/ArchiveAssignmentCommand");
-const RestoreAssignmentCommand = require("../commands/RestoreAssignmentCommand");
+const Task = require('../models/Task');
+const Subject = require('../models/Subject');
+const { protect } = require('../middleware/authMiddleware');
+const { UserFactory } = require('../factories/UserFactory');
+const { getAssignmentState } = require('../states/AssignmentState');
+const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
+const { markOverdueTasks } = require('../services/OverdueTaskService');
+const ArchiveAssignmentCommand = require('../commands/ArchiveAssignmentCommand');
+const RestoreAssignmentCommand = require('../commands/RestoreAssignmentCommand');
+const ActivityLogService = require('../services/ActivityLogService');
 
-router.get("/", protect, async (req, res) => {
+router.get('/', protect, async (req, res) => {
   try {
     await markOverdueTasks({ userId: req.user._id });
-    const tasks = await Task.find({ user: req.user._id }).populate("subject");
+    const tasks = await Task.find({ user: req.user._id }).populate('subject');
     res.json(tasks);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch tasks" });
+    res.status(500).json({ message: 'Failed to fetch tasks' });
   }
 });
 
-// tasks a teacher is allowed to grade - everything under the subjects they've
-// been assigned to. uses the teacher list added in the assign-teachers feature.
-router.get("/gradeable", protect, async (req, res) => {
+router.get('/gradeable', protect, async (req, res) => {
   try {
     const account = UserFactory.create(req.user);
     if (!account.canGrade()) {
-      return res
-        .status(403)
-        .json({ message: "Only teachers can view gradeable tasks" });
+      return res.status(403).json({ message: 'Only teachers can view gradeable tasks' });
     }
 
-    const subjects = await Subject.find({ teachers: req.user._id }).select(
-      "_id",
-    );
+    const subjects = await Subject.find({ teachers: req.user._id }).select('_id');
     const tasks = await Task.find({
       subject: { $in: subjects.map((s) => s._id) },
       status: ASSIGNMENT_STATUSES.SUBMITTED,
     })
-      .populate("subject", "name")
-      .populate("user", "name email");
+      .populate('subject', 'name')
+      .populate('user', 'name email');
 
     res.json(tasks);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch gradeable tasks" });
+    res.status(500).json({ message: 'Failed to fetch gradeable tasks' });
   }
 });
 
-router.post("/", protect, async (req, res) => {
+router.post('/', protect, async (req, res) => {
   try {
-    if (req.user.role === "student") {
+    if (req.user.role === 'student') {
       return res.status(403).json({
         message: "Assignments are set by your teacher; you can't create them",
       });
     }
 
-    const { title, description, deadline, status, subject, priority } =
-      req.body;
+    const { title, description, deadline, status, subject, priority } = req.body;
 
     const task = await Task.create({
       title,
@@ -68,19 +62,19 @@ router.post("/", protect, async (req, res) => {
       user: req.user._id,
     });
 
-    const populatedTask = await task.populate("subject");
+    const populatedTask = await task.populate('subject');
     res.status(201).json(populatedTask);
   } catch (error) {
-    res.status(500).json({ message: "Failed to save task" });
+    res.status(500).json({ message: 'Failed to save task' });
   }
 });
 
-router.put("/:id/submit", protect, async (req, res) => {
+router.put('/:id/submit', protect, async (req, res) => {
   try {
     const task = await Task.findOne({ _id: req.params.id, user: req.user._id });
 
     if (!task) {
-      return res.status(404).json({ message: "Task not found" });
+      return res.status(404).json({ message: 'Task not found' });
     }
 
     if (!getAssignmentState(task.status).canSubmit()) {
@@ -91,50 +85,82 @@ router.put("/:id/submit", protect, async (req, res) => {
 
     task.status = ASSIGNMENT_STATUSES.SUBMITTED;
     const saved = await task.save();
-    const populated = await saved.populate("subject");
+    const populated = await saved.populate('subject');
+
+    await ActivityLogService.recordActivity({
+      actor: req.user._id,
+      action: 'task.submitted',
+      entityType: 'Task',
+      entityId: task._id,
+      message: `${req.user.email} submitted "${task.title}" for grading`,
+      metadata: {
+        status: ASSIGNMENT_STATUSES.SUBMITTED,
+        subject: task.subject,
+        assignment: task.assignment,
+      },
+    });
 
     res.json(populated);
   } catch (error) {
-    res.status(500).json({ message: "Failed to submit assignment" });
+    res.status(500).json({ message: 'Failed to submit assignment' });
   }
 });
 
-// a student archives their own assignment from the active tracker without deleting it
-router.put("/:id/archive", protect, async (req, res) => {
+router.put('/:id/archive', protect, async (req, res) => {
   try {
     const command = new ArchiveAssignmentCommand(req.params.id, req.user._id);
     const task = await command.execute();
 
     if (!task) {
-      return res.status(404).json({ message: "Task not found" });
+      return res.status(404).json({ message: 'Task not found' });
     }
+
+    await ActivityLogService.recordActivity({
+      actor: req.user._id,
+      action: 'task.archived',
+      entityType: 'Task',
+      entityId: task._id,
+      message: `${req.user.email} archived "${task.title}"`,
+      metadata: {
+        subject: task.subject?._id || task.subject,
+        assignment: task.assignment,
+      },
+    });
 
     res.json(task);
   } catch (error) {
-    res.status(500).json({ message: "Failed to archive task" });
+    res.status(500).json({ message: 'Failed to archive task' });
   }
 });
 
-// a student restores their own assignment from the archived list back to the active tracker
-router.put("/:id/restore", protect, async (req, res) => {
+router.put('/:id/restore', protect, async (req, res) => {
   try {
     const command = new RestoreAssignmentCommand(req.params.id, req.user._id);
     const task = await command.execute();
 
     if (!task) {
-      return res.status(404).json({ message: "Task not found" });
+      return res.status(404).json({ message: 'Task not found' });
     }
+
+    await ActivityLogService.recordActivity({
+      actor: req.user._id,
+      action: 'task.restored',
+      entityType: 'Task',
+      entityId: task._id,
+      message: `${req.user.email} restored "${task.title}"`,
+      metadata: {
+        subject: task.subject?._id || task.subject,
+        assignment: task.assignment,
+      },
+    });
 
     res.json(task);
   } catch (error) {
-    res.status(500).json({ message: "Failed to restore task" });
+    res.status(500).json({ message: 'Failed to restore task' });
   }
 });
 
-// a student updates their own tracking fields on an assigned task. the title,
-// deadline and subject belong to the teacher's assignment, so students can only
-// change personal progress information such as status and priority.
-router.put("/:id", protect, async (req, res) => {
+router.put('/:id', protect, async (req, res) => {
   try {
     const { status, priority } = req.body;
 
@@ -144,42 +170,54 @@ router.put("/:id", protect, async (req, res) => {
       ASSIGNMENT_STATUSES.COMPLETED,
     ];
 
-    const studentSettablePriorities = ["Low", "Medium", "High"];
+    const studentSettablePriorities = ['Low', 'Medium', 'High'];
 
     if (!studentSettable.includes(status)) {
       return res.status(400).json({
-        message: "Status must be Not Started, In Progress or Completed",
+        message: 'Status must be Not Started, In Progress or Completed',
       });
     }
 
     if (!studentSettablePriorities.includes(priority)) {
       return res.status(400).json({
-        message: "Priority must be Low, Medium or High",
+        message: 'Priority must be Low, Medium or High',
       });
     }
 
     const task = await Task.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
       { status, priority },
-      { new: true, runValidators: true },
-    ).populate("subject");
+      { new: true, runValidators: true }
+    ).populate('subject');
 
     if (!task) {
-      return res.status(404).json({ message: "Task not found" });
+      return res.status(404).json({ message: 'Task not found' });
     }
+
+    await ActivityLogService.recordActivity({
+      actor: req.user._id,
+      action: 'task.updated',
+      entityType: 'Task',
+      entityId: task._id,
+      message: `${req.user.email} updated "${task.title}"`,
+      metadata: {
+        status,
+        priority,
+        subject: task.subject?._id || task.subject,
+        assignment: task.assignment,
+      },
+    });
 
     res.json(task);
   } catch (error) {
-    res.status(500).json({ message: "Failed to update task" });
+    res.status(500).json({ message: 'Failed to update task' });
   }
 });
 
-router.delete("/:id", protect, async (req, res) => {
+router.delete('/:id', protect, async (req, res) => {
   try {
-    if (req.user.role === "student") {
-      return res
-        .status(403)
-        .json({ message: "Assignments are managed by your teacher" });
+    if (req.user.role === 'student') {
+      return res.status(403).json({ message: 'Assignments are managed by your teacher' });
     }
 
     const task = await Task.findOneAndDelete({
@@ -188,12 +226,24 @@ router.delete("/:id", protect, async (req, res) => {
     });
 
     if (!task) {
-      return res.status(404).json({ message: "Task not found" });
+      return res.status(404).json({ message: 'Task not found' });
     }
 
-    res.json({ message: "Task deleted successfully" });
+    await ActivityLogService.recordActivity({
+      actor: req.user._id,
+      action: 'task.deleted',
+      entityType: 'Task',
+      entityId: task._id,
+      message: `${req.user.email} deleted task "${task.title}"`,
+      metadata: {
+        subject: task.subject,
+        assignment: task.assignment,
+      },
+    });
+
+    res.json({ message: 'Task deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: "Failed to delete task" });
+    res.status(500).json({ message: 'Failed to delete task' });
   }
 });
 
