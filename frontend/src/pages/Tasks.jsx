@@ -16,6 +16,7 @@ const Tasks = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [subjectFilter, setSubjectFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState('asc');
+  const [showArchived, setShowArchived] = useState(false);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
@@ -45,6 +46,7 @@ const Tasks = () => {
   }, [user]);
 
   const filteredTasks = tasks
+    .filter((task) => (showArchived ? task.isArchived : !task.isArchived))
     .filter((task) => {
       if (statusFilter === 'all') return true;
       return task.status === statusFilter;
@@ -61,11 +63,27 @@ const Tasks = () => {
 
   return (
     <>
-      <div className="mb-lg">
-        <h2 className="font-headline-lg text-headline-lg text-primary tracking-tight">My Assignments</h2>
-        <p className="font-body-md text-body-md text-on-surface-variant mt-xs">
-          Work your teachers have set. Track your progress and submit when you're ready.
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-lg gap-md">
+        <div>
+          <h2 className="font-headline-lg text-headline-lg text-primary tracking-tight">
+            {showArchived ? 'Archived Assignments' : 'My Assignments'}
+          </h2>
+          <p className="font-body-md text-body-md text-on-surface-variant mt-xs">
+            {showArchived
+              ? 'Assignments you have archived. Restore them if you need them back in your active tracker.'
+              : "Work your teachers have set. Track your progress and submit when you're ready."}
+          </p>
+        </div>
+
+        <button
+          onClick={() => setShowArchived(!showArchived)}
+          className="inline-flex items-center justify-center gap-xs border border-outline-variant text-on-surface font-label-md text-label-md px-md py-sm rounded-lg hover:bg-surface-container-low transition-colors whitespace-nowrap"
+        >
+          <span className="material-symbols-outlined text-[18px]">
+            {showArchived ? 'assignment' : 'archive'}
+          </span>
+          {showArchived ? 'View Active' : 'View Archived'}
+        </button>
       </div>
 
       <AssignmentStats tasks={tasks} />
@@ -89,10 +107,11 @@ const Tasks = () => {
           sortOrder={sortOrder}
           setSortOrder={setSortOrder}
           subjects={subjects}
+          showArchived={showArchived}
         />
       </div>
 
-      <TaskList tasks={filteredTasks} setTasks={setTasks} />
+      <TaskList tasks={filteredTasks} setTasks={setTasks} showArchived={showArchived} />
     </>
   );
 };

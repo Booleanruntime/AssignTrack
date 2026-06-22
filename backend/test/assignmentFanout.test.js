@@ -3,6 +3,8 @@ const sinon = require('sinon');
 const Assignment = require('../models/Assignment');
 const Task = require('../models/Task');
 const Subject = require('../models/Subject');
+const NotificationService = require('../services/NotificationService');
+const ActivityLogService = require('../services/ActivityLogService');
 const { createAssignment, instancesFor } = require('../controllers/assignmentController');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
 
@@ -34,13 +36,39 @@ describe('Assignment fan-out', () => {
     it('creates the assignment and fans out a task per enrolled student', async () => {
         sinon.stub(Subject, 'findById').resolves({ _id: 'subj1', teachers: ['teacher1'], students: ['s1', 's2'] });
         sinon.stub(Assignment, 'create').resolves({ _id: 'a1', toObject: () => ({ _id: 'a1', title: 'Essay' }) });
-        const insert = sinon.stub(Task, 'insertMany').resolves([]);
+
+        const insert = sinon.stub(Task, 'insertMany').resolves([
+            { _id: 'task1', user: 's1' },
+            { _id: 'task2', user: 's2' },
+        ]);
+
+        const notifications = sinon.stub(NotificationService, 'createMany').resolves([]);
+        const activity = sinon.stub(ActivityLogService, 'recordActivity').resolves();
         const res = makeRes();
 
         await createAssignment({ user: teacher, body }, res);
 
         expect(insert.calledOnce).to.equal(true);
         expect(insert.firstCall.args[0]).to.have.length(2);
+
+        expect(notifications.calledOnce).to.equal(true);
+        expect(notifications.firstCall.args[0]).to.have.length(2);
+        expect(notifications.firstCall.args[0][0]).to.include({
+            recipient: 's1',
+            type: 'assignment.created',
+            title: 'New assignment',
+            assignment: 'a1',
+            task: 'task1',
+        });
+
+        expect(activity.calledOnce).to.equal(true);
+        expect(activity.firstCall.args[0]).to.include({
+            actor: teacher._id,
+            action: 'assignment.created',
+            entityType: 'Assignment',
+            entityId: 'a1',
+        });
+
         expect(res.status.calledWith(201)).to.equal(true);
     });
 
@@ -65,4 +93,77 @@ describe('Assignment fan-out', () => {
         expect(res.status.calledWith(403)).to.equal(true);
         expect(create.called).to.equal(false);
     });
+
+    it('creates a quiz assignment through the factory and fans quiz details out to student tasks', async () => {
+    const quizBody = {
+        title: 'OOP Quiz',
+        description: 'Complete it',
+        deadline: new Date('2026-08-01'),
+        subject: 'subj1',
+        assignmentType: 'quiz',
+        questionCount: 20,
+        timeLimitMinutes: 30,
+    };
+
+    sinon.stub(Subject, 'findById').resolves({
+        _id: 'subj1',
+        teachers: ['teacher1'],
+        students: ['s1', 's2'],
+    });
+
+    const create = sinon.stub(Assignment, 'create').resolves({
+        _id: 'a1',
+        title: 'OOP Quiz',
+        description: 'Complete it',
+        deadline: quizBody.deadline,
+        subject: 'subj1',
+        assignmentType: 'quiz',
+        assignmentDetails: {
+            questionCount: 20,
+            timeLimitMinutes: 30,
+        },
+        toObject: () => ({
+            _id: 'a1',
+            title: 'OOP Quiz',
+            assignmentType: 'quiz',
+            assignmentDetails: {
+                questionCount: 20,
+                timeLimitMinutes: 30,
+            },
+        }),
+    });
+
+    const insert = sinon.stub(Task, 'insertMany').resolves([
+        { _id: 'task1', user: 's1' },
+        { _id: 'task2', user: 's2' },
+    ]);
+
+    sinon.stub(NotificationService, 'createMany').resolves([]);
+    sinon.stub(ActivityLogService, 'recordActivity').resolves();
+
+    const res = makeRes();
+
+    await createAssignment({ user: teacher, body: quizBody }, res);
+
+    expect(create.calledOnce).to.equal(true);
+    expect(create.firstCall.args[0].assignmentType).to.equal('quiz');
+    expect(create.firstCall.args[0].assignmentDetails).to.deep.equal({
+        questionCount: 20,
+        timeLimitMinutes: 30,
+    });
+
+    expect(insert.calledOnce).to.equal(true);
+    expect(insert.firstCall.args[0]).to.have.length(2);
+    expect(insert.firstCall.args[0][0]).to.include({
+        user: 's1',
+        assignmentType: 'quiz',
+        status: ASSIGNMENT_STATUSES.NOT_STARTED,
+    });
+    expect(insert.firstCall.args[0][0].assignmentDetails).to.deep.equal({
+        questionCount: 20,
+        timeLimitMinutes: 30,
+    });
+
+    expect(res.status.calledWith(201)).to.equal(true);
+});
 });

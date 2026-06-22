@@ -20,6 +20,15 @@ const assignmentSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    assignmentType: {
+      type: String,
+      enum: ['standard', 'quiz', 'presentation'],
+      default: 'standard',
+    },
+    assignmentDetails: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
     subject: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Subject',

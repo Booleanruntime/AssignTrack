@@ -4,6 +4,9 @@ const Subject = require('../models/Subject');
 const Logger = require('../utils/Logger');
 const { UserFactory } = require('../factories/UserFactory');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
+const { AssignmentFactory } = require('../factories/AssignmentFactory');
+const NotificationService = require('../services/NotificationService');
+const ActivityLogService = require('../services/ActivityLogService');
 
 const logger = Logger.getInstance();
 
@@ -19,6 +22,8 @@ function instancesFor(assignment, subject) {
         user: studentId,
         status: ASSIGNMENT_STATUSES.NOT_STARTED,
         assignment: assignment._id,
+        assignmentType: assignment.assignmentType,
+        assignmentDetails: assignment.assignmentDetails,
     }));
 }
 
@@ -34,7 +39,8 @@ const createAssignment = async (req, res) => {
             return res.status(403).json({ message: 'Only teachers can create assignments' });
         }
 
-        const { title, description, deadline, subject: subjectId } = req.body;
+        const { subject: subjectId } = req.body;
+        const assignmentType = AssignmentFactory.create(req.body.assignmentType, req.body);
         const subject = await Subject.findById(subjectId);
         if (!subject) return res.status(404).json({ message: 'Subject not found' });
         if (!teaches(subject, req.user._id)) {
@@ -42,18 +48,43 @@ const createAssignment = async (req, res) => {
         }
 
         const assignment = await Assignment.create({
-            title,
-            description,
-            deadline,
+            ...assignmentType.toAssignmentPayload(),
             subject: subject._id,
             teacher: req.user._id,
         });
 
         // fan out to everyone enrolled in the subject
         const instances = instancesFor(assignment, subject);
-        if (instances.length) await Task.insertMany(instances);
+        const insertedTasks = instances.length ? await Task.insertMany(instances) : [];
+        if (insertedTasks.length) {
+            await NotificationService.createMany(insertedTasks.map((task) => ({
+                recipient: task.user,
+                type: 'assignment.created',
+                title: 'New assignment',
+                message: `"${assignment.title}" has been assigned.`,
+                assignment: assignment._id,
+                task: task._id,
+                metadata: {
+                    subject: subject._id,
+                    deadline: assignment.deadline,
+                },
+            })));
+        }
 
-        logger.info(`${req.user.email} created assignment "${title}" → ${instances.length} student(s)`);
+        await ActivityLogService.recordActivity({
+            actor: req.user._id,
+            action: 'assignment.created',
+            entityType: 'Assignment',
+            entityId: assignment._id,
+            message: `${req.user.email} created assignment "${assignment.title}"`,
+            metadata: {
+                subject: subject._id,
+                assignedTo: instances.length,
+            },
+        });
+
+        logger.info(
+            `${req.user.email} created ${assignment.assignmentType} assignment "${assignment.title}" → ${instances.length} student(s)`);
         res.status(201).json({ ...assignment.toObject(), assignedTo: instances.length });
     } catch (error) {
         logger.error(`Create assignment failed: ${error.message}`);
@@ -99,8 +130,9 @@ const getAssignments = async (req, res) => {
     }
 };
 
-// editing the template pushes the changed details down to every instance, but
-// leaves each student's status and grade alone.
+// editing the teacher assignment template pushes shared details down to every
+// student Task instance, but leaves each student's personal progress data
+// alone, including status, priority, archive state and grades.
 const updateAssignment = async (req, res) => {
     try {
         const account = UserFactory.create(req.user);
@@ -111,18 +143,67 @@ const updateAssignment = async (req, res) => {
         const assignment = await Assignment.findOne({ _id: req.params.id, teacher: req.user._id });
         if (!assignment) return res.status(404).json({ message: 'Assignment not found' });
 
-        const { title, description, deadline } = req.body;
-        if (title !== undefined) assignment.title = title;
-        if (description !== undefined) assignment.description = description;
-        if (deadline !== undefined) assignment.deadline = deadline;
+        // Rebuild the assignment type object through the factory so edits follow
+        // the same construction rules as creation. If assignmentType is omitted,
+        // keep the existing type.
+        const assignmentType = AssignmentFactory.create(
+            req.body.assignmentType || assignment.assignmentType,
+            {
+                title: req.body.title !== undefined ? req.body.title : assignment.title,
+                description: req.body.description !== undefined ? req.body.description : assignment.description,
+                deadline: req.body.deadline !== undefined ? req.body.deadline : assignment.deadline,
+                assignmentType: req.body.assignmentType || assignment.assignmentType,
+
+                // fall back to existing details if the request does not include
+                // new type-specific fields
+                questionCount:
+                    req.body.questionCount !== undefined
+                        ? req.body.questionCount
+                        : assignment.assignmentDetails?.questionCount,
+                timeLimitMinutes:
+                    req.body.timeLimitMinutes !== undefined
+                        ? req.body.timeLimitMinutes
+                        : assignment.assignmentDetails?.timeLimitMinutes,
+                presentationLengthMinutes:
+                    req.body.presentationLengthMinutes !== undefined
+                        ? req.body.presentationLengthMinutes
+                        : assignment.assignmentDetails?.presentationLengthMinutes,
+            }
+        );
+
+        const payload = assignmentType.toAssignmentPayload();
+
+        assignment.title = payload.title;
+        assignment.description = payload.description;
+        assignment.deadline = payload.deadline;
+        assignment.assignmentType = payload.assignmentType;
+        assignment.assignmentDetails = payload.assignmentDetails;
+
         const saved = await assignment.save();
 
         await Task.updateMany(
             { assignment: assignment._id },
-            { title: saved.title, description: saved.description, deadline: saved.deadline }
+            {
+                title: saved.title,
+                description: saved.description,
+                deadline: saved.deadline,
+                assignmentType: saved.assignmentType,
+                assignmentDetails: saved.assignmentDetails,
+            }
         );
 
-        logger.info(`${req.user.email} edited assignment ${assignment._id} (propagated to instances)`);
+        await ActivityLogService.recordActivity({
+            actor: req.user._id,
+            action: 'assignment.updated',
+            entityType: 'Assignment',
+            entityId: assignment._id,
+            message: `${req.user.email} updated assignment "${saved.title}"`,
+            metadata: {
+                subject: saved.subject,
+            },
+        });
+
+        logger.info(`${req.user.email} edited ${saved.assignmentType} assignment ${assignment._id} (propagated to instances)`);
         res.json(saved);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -142,6 +223,17 @@ const deleteAssignment = async (req, res) => {
 
         await Task.deleteMany({ assignment: assignment._id });
         await assignment.deleteOne();
+
+        await ActivityLogService.recordActivity({
+            actor: req.user._id,
+            action: 'assignment.deleted',
+            entityType: 'Assignment',
+            entityId: assignment._id,
+            message: `${req.user.email} deleted assignment "${assignment.title}"`,
+            metadata: {
+                subject: assignment.subject,
+            },
+        });
 
         logger.info(`${req.user.email} deleted assignment ${assignment._id} and its instances`);
         res.json({ message: 'Assignment deleted' });

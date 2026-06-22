@@ -1,12 +1,13 @@
 # AssignTrack — Infrastructure (Terraform)
 
 Infrastructure-as-code for AssignTrack. A **single EC2 box** runs the whole app:
-nginx serves the React build **and** proxies `/api` → the Node backend on `:5001`.
+nginx is the edge reverse proxy — `/` → the React build served by PM2 on `:3000`,
+`/api` → the Node backend on `:5001`. Both tiers run as PM2-managed processes.
 The box also hosts the GitHub Actions **self-hosted runner** that ships updates.
 
 ```
 GitHub push to main ─▶ self-hosted runner (on EC2) ─▶ rebuild + restart in place
-Internet ─▶ EC2 :80 (nginx) ─┬─ /        → React build in /var/www/assigntrack
+Internet ─▶ EC2 :80 (nginx) ─┬─ /        → PM2 'serve' static :3000 (/var/www/assigntrack)
                              └─ /api/...  → Node backend :5001 ─▶ MongoDB Atlas
 ```
 
@@ -18,7 +19,7 @@ Internet ─▶ EC2 :80 (nginx) ─┬─ /        → React build in /var/www/a
 | `main.tf` | AWS provider + S3 remote backend (partial config). |
 | `network.tf` | Default VPC + security group (80 public, 22 optional). |
 | `ec2.tf` | Ubuntu AMI, IAM role + SSM instance profile, instance, Elastic IP. |
-| `user_data.sh.tpl` | Boot script: swap → Node/PM2 → backend → frontend build → nginx → runner. |
+| `user_data.sh.tpl` | Boot script: swap → Node/PM2 → backend (PM2) → frontend build + PM2 serve → nginx → runner. |
 | `outputs.tf` | App URL, public IP, SSM connect command. |
 
 ## One-time setup

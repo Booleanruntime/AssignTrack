@@ -45,4 +45,36 @@ describe('AssignTrack Task model tests', () => {
 
     expect(error.errors.status).to.exist;
   });
+
+  it('should accept valid assignment priority values', () => {
+    ['Low', 'Medium', 'High'].forEach((priority) => {
+      const task = new Task({
+        title: 'Assignment 1 Report',
+        description: 'Complete IFQ636 report',
+        deadline: new Date('2026-05-31'),
+        user: new mongoose.Types.ObjectId(),
+        subject: new mongoose.Types.ObjectId(),
+        priority,
+      });
+
+      const error = task.validateSync();
+
+      expect(error).to.equal(undefined);
+    });
+  });
+
+  it('should reject an invalid assignment priority value', () => {
+    const task = new Task({
+      title: 'Assignment 1 Report',
+      description: 'Complete IFQ636 report',
+      deadline: new Date('2026-05-31'),
+      user: new mongoose.Types.ObjectId(),
+      subject: new mongoose.Types.ObjectId(),
+      priority: 'Urgent',
+    });
+
+    const error = task.validateSync();
+
+    expect(error.errors.priority).to.exist;
+  });
 });
