@@ -5,8 +5,7 @@ const Logger = require('../utils/Logger');
 const { UserFactory } = require('../factories/UserFactory');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
 const { AssignmentFactory } = require('../factories/AssignmentFactory');
-const NotificationService = require('../services/NotificationService');
-const ActivityLogService = require('../services/ActivityLogService');
+const eventBus = require('../events/appEventBus');
 
 const logger = Logger.getInstance();
 
@@ -56,22 +55,13 @@ const createAssignment = async (req, res) => {
         // fan out to everyone enrolled in the subject
         const instances = instancesFor(assignment, subject);
         const insertedTasks = instances.length ? await Task.insertMany(instances) : [];
-        if (insertedTasks.length) {
-            await NotificationService.createMany(insertedTasks.map((task) => ({
-                recipient: task.user,
-                type: 'assignment.created',
-                title: 'New assignment',
-                message: `"${assignment.title}" has been assigned.`,
-                assignment: assignment._id,
-                task: task._id,
-                metadata: {
-                    subject: subject._id,
-                    deadline: assignment.deadline,
-                },
-            })));
-        }
+        await eventBus.emit('assignment.created', {
+            assignment,
+            subject,
+            tasks: insertedTasks,
+        });
 
-        await ActivityLogService.recordActivity({
+        await eventBus.emit('activity.recorded', {
             actor: req.user._id,
             action: 'assignment.created',
             entityType: 'Assignment',
@@ -192,7 +182,7 @@ const updateAssignment = async (req, res) => {
             }
         );
 
-        await ActivityLogService.recordActivity({
+        await eventBus.emit('activity.recorded', {
             actor: req.user._id,
             action: 'assignment.updated',
             entityType: 'Assignment',
@@ -224,7 +214,7 @@ const deleteAssignment = async (req, res) => {
         await Task.deleteMany({ assignment: assignment._id });
         await assignment.deleteOne();
 
-        await ActivityLogService.recordActivity({
+        await eventBus.emit('activity.recorded', {
             actor: req.user._id,
             action: 'assignment.deleted',
             entityType: 'Assignment',

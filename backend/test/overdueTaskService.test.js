@@ -6,7 +6,7 @@ const {
   OVERDUE_ELIGIBLE_STATUSES,
 } = require('../services/OverdueTaskService');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
-const NotificationService = require('../services/NotificationService');
+const eventBus = require('../events/appEventBus');
 
 describe('OverdueTaskService', () => {
   afterEach(() => sinon.restore());
@@ -34,7 +34,7 @@ describe('OverdueTaskService', () => {
     const select = sinon.stub().resolves(overdueTasks);
     const find = sinon.stub(Task, 'find').returns({ select });
     const updateMany = sinon.stub(Task, 'updateMany').resolves({ modifiedCount: 3 });
-    const notifications = sinon.stub(NotificationService, 'createMany').resolves([]);
+    const emit = sinon.stub(eventBus, 'emit').resolves([]);
 
     const result = await markOverdueTasks({ now });
 
@@ -53,22 +53,16 @@ describe('OverdueTaskService', () => {
     expect(updateMany.firstCall.args[1]).to.deep.equal({
       status: ASSIGNMENT_STATUSES.OVERDUE,
     });
-    expect(notifications.calledOnce).to.equal(true);
-    expect(notifications.firstCall.args[0][0]).to.include({
-      recipient: 'student1',
-      type: 'task.overdue',
-      title: 'Assignment overdue',
-      message: '"Essay" is now overdue.',
-      task: 'task1',
-      assignment: 'assignment1',
-    });
+    expect(emit.calledOnce).to.equal(true);
+    expect(emit.firstCall.args[0]).to.equal('task.overdue');
+    expect(emit.firstCall.args[1]).to.deep.equal({ tasks: overdueTasks });
   });
 
   it('preserves terminal submitted and graded states', async () => {
     const select = sinon.stub().resolves([]);
     const find = sinon.stub(Task, 'find').returns({ select });
     sinon.stub(Task, 'updateMany').resolves({ modifiedCount: 0 });
-    sinon.stub(NotificationService, 'createMany').resolves([]);
+    sinon.stub(eventBus, 'emit').resolves([]);
 
     await markOverdueTasks();
 
@@ -79,7 +73,7 @@ describe('OverdueTaskService', () => {
     expect(statusFilter).to.not.include(ASSIGNMENT_STATUSES.SUBMITTED);
     expect(statusFilter).to.not.include(ASSIGNMENT_STATUSES.GRADED);
     expect(Task.updateMany.called).to.equal(false);
-    expect(NotificationService.createMany.called).to.equal(false);
+    expect(eventBus.emit.called).to.equal(false);
   });
 
   it('can scope overdue detection to one student', async () => {
@@ -97,12 +91,12 @@ describe('OverdueTaskService', () => {
     const select = sinon.stub().resolves([]);
     sinon.stub(Task, 'find').returns({ select });
     const updateMany = sinon.stub(Task, 'updateMany');
-    const notifications = sinon.stub(NotificationService, 'createMany');
+    const emit = sinon.stub(eventBus, 'emit');
 
     const result = await markOverdueTasks();
 
     expect(result).to.deep.equal({ matchedCount: 0, modifiedCount: 0, notifiedCount: 0 });
     expect(updateMany.called).to.equal(false);
-    expect(notifications.called).to.equal(false);
+    expect(emit.called).to.equal(false);
   });
 });
