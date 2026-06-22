@@ -52,3 +52,8 @@ jobs:
         run: |
           sudo rsync -a --delete frontend/build/ "$WEB_ROOT/"
           sudo chown -R www-data:www-data "$WEB_ROOT"
+
+      - name: Restart frontend static server with PM2
+        run: |
+          pm2 restart assigntrack-frontend || pm2 serve "$WEB_ROOT" 3000 --name assigntrack-frontend --spa
+          pm2 save

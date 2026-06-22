@@ -41,9 +41,10 @@ sudo -u ubuntu pm2 save
 env PATH=$PATH:/usr/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu
 
 # --------------------------------------------------------------------------
-# 4. Frontend — build the React app and publish it to the nginx web root.
+# 4. Frontend — build the React app, publish it, and serve it under PM2.
 #    CRA reads NODE_ENV=production, so axiosConfig falls back to the relative
-#    '/api' base, which nginx proxies to the backend below.
+#    '/api' base, which nginx proxies to the backend below. The build is served
+#    by PM2's built-in static server so the frontend is a managed process too.
 # --------------------------------------------------------------------------
 WEB_ROOT=/var/www/assigntrack
 mkdir -p $WEB_ROOT
@@ -51,16 +52,19 @@ sudo -u ubuntu bash -c "cd $APP_DIR/frontend && npm ci && npm run build"
 cp -r $APP_DIR/frontend/build/. $WEB_ROOT/
 chown -R www-data:www-data $WEB_ROOT
 
+# Serve the static build on :3000 under PM2 (--spa falls back to index.html for
+# client-side routing). pm2 save so both tiers come back on reboot.
+sudo -u ubuntu pm2 serve $WEB_ROOT 3000 --name assigntrack-frontend --spa
+sudo -u ubuntu pm2 save
+
 # --------------------------------------------------------------------------
-# 5. nginx — serve the React build, proxy /api to the Node backend (HTTP only)
+# 5. nginx — edge reverse proxy: / to the PM2 static server :3000,
+#    /api to the Node backend :5001 (HTTP only)
 # --------------------------------------------------------------------------
 cat > /etc/nginx/sites-available/assigntrack <<NGINX
 server {
     listen 80 default_server;
     server_name _;
-
-    root $WEB_ROOT;
-    index index.html;
 
     # API requests go to the Node backend on :5001.
     location /api {
@@ -71,9 +75,13 @@ server {
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
 
-    # Everything else is the SPA; fall back to index.html for client routing.
+    # Everything else is the React SPA, served by the PM2 'serve' process on :3000.
     location / {
-        try_files \$uri \$uri/ /index.html;
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
 }
 NGINX
