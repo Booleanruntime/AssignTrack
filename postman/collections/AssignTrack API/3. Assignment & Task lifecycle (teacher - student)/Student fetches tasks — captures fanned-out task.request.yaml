@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/tasks"
+method: GET
+headers:
+  Authorization: Bearer {{studentToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      var tasks = pm.response.json();
+      pm.test("Tasks returned as an array", function () { pm.expect(tasks).to.be.an("array"); });
+      var t = tasks.find(function (x) { return String(x.assignment) === pm.collectionVariables.get("assignmentId"); });
+      pm.test("Task was created for the student", function () { pm.expect(t, "fanned-out task").to.exist; });
+      if (t) pm.collectionVariables.set("taskId", t._id);
+    language: text/javascript
+order: 5000

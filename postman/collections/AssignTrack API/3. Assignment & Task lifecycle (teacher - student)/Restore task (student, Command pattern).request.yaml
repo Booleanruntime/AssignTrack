@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/tasks/{{taskId}}/restore"
+method: PUT
+headers:
+  Authorization: Bearer {{studentToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      pm.test("Task is restored", function () { pm.expect(pm.response.json().isArchived).to.be.false; });
+    language: text/javascript
+order: 16000

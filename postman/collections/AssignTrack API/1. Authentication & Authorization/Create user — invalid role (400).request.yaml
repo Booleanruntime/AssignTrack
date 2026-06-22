@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/users"
+method: POST
+headers:
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Bad Role",
+      "email": "badrole@test.com",
+      "password": "123",
+      "role": "wizard"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 400", function () { pm.response.to.have.status(400); });
+      pm.test("Returns the expected message", function () { pm.expect(pm.response.json().message).to.include("Invalid role"); });
+    language: text/javascript
+order: 7000

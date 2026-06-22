@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/subjects/{{tempSubjectId}}/teachers"
+method: PUT
+headers:
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "teacherIds": [
+        "{{teacherId}}"
+      ]
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      pm.test("Teacher attached to subject", function () { var ids = pm.response.json().teachers.map(function (t) { return t._id || t; }); pm.expect(ids).to.include(pm.collectionVariables.get("teacherId")); });
+    language: text/javascript
+order: 3000

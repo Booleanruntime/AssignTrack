@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{baseUrl}}/subjects"
+method: POST
+headers:
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "API Test Subject (Postman)",
+      "description": "Temporary subject created by the Postman test run."
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201", function () { pm.response.to.have.status(201); });
+      var b = pm.response.json();
+      pm.test("Returns the created subject id", function () { pm.expect(b).to.have.property("_id"); });
+      pm.collectionVariables.set("tempSubjectId", b._id);
+    language: text/javascript
+order: 2000

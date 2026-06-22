@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/assignments/{{assignmentId}}"
+method: DELETE
+headers:
+  Authorization: Bearer {{teacherToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      pm.test("Returns the expected message", function () { pm.expect(pm.response.json().message).to.include("Assignment deleted"); });
+    language: text/javascript
+order: 20000

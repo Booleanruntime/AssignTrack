@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "student@seed.test",
+      "password": "Password123!"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      var b = pm.response.json();
+      pm.test("Role is student", function () { pm.expect(b.role).to.eql("student"); });
+      pm.collectionVariables.set("studentToken", b.token);
+      pm.collectionVariables.set("studentId", b.id);
+    language: text/javascript
+order: 4000

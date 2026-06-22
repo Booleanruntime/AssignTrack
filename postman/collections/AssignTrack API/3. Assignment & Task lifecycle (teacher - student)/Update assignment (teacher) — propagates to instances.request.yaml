@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/assignments/{{assignmentId}}"
+method: PUT
+headers:
+  Authorization: Bearer {{teacherToken}}
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "Postman API Test Assignment (edited)",
+      "description": "Edited via Postman.",
+      "deadline": "2027-06-30T23:59:59.000Z"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      pm.test("Title was updated", function () { pm.expect(pm.response.json().title).to.include("(edited)"); });
+    language: text/javascript
+order: 3000

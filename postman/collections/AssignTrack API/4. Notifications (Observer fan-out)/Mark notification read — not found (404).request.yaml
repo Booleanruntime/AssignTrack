@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/notifications/000000000000000000000000/read"
+method: PUT
+headers:
+  Authorization: Bearer {{studentToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 404", function () { pm.response.to.have.status(404); });
+      pm.test("Returns the expected message", function () { pm.expect(pm.response.json().message).to.include("Notification not found"); });
+    language: text/javascript
+order: 4000

@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/subjects"
+method: GET
+headers:
+  Authorization: Bearer {{studentToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      var subs = pm.response.json();
+      pm.test("Subjects returned as an array", function () { pm.expect(subs).to.be.an("array"); });
+      var se = subs.find(function (s) { return s.name === "Software Engineering (Seed)"; });
+      pm.test("Seed subject is present", function () { pm.expect(se, "Software Engineering (Seed)").to.exist; });
+      if (se) pm.collectionVariables.set("seedSubjectId", se._id);
+    language: text/javascript
+order: 1000

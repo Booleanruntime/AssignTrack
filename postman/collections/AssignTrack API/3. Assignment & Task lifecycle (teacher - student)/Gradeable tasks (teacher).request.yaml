@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/tasks/gradeable"
+method: GET
+headers:
+  Authorization: Bearer {{teacherToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      var g = pm.response.json();
+      pm.test("Returns an array", function () { pm.expect(g).to.be.an("array"); });
+      pm.test("Submitted task is now gradeable", function () { pm.expect(g.some(function (x) { return x._id === pm.collectionVariables.get("taskId"); })).to.be.true; });
+    language: text/javascript
+order: 9000

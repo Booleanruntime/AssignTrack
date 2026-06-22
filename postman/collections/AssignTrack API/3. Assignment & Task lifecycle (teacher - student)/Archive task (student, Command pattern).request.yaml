@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/tasks/{{taskId}}/archive"
+method: PUT
+headers:
+  Authorization: Bearer {{studentToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      pm.test("Task is archived", function () { pm.expect(pm.response.json().isArchived).to.be.true; });
+    language: text/javascript
+order: 15000

@@ -1,0 +1,32 @@
+$kind: http-request
+url: "{{baseUrl}}/grades/{{gradeId}}"
+method: PUT
+headers:
+  Authorization: Bearer {{teacherToken}}
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "scheme": "percentage",
+      "summary": "Revised after re-mark.",
+      "rubric": [
+        {
+          "criterion": "Correctness",
+          "score": 19,
+          "outOf": 20
+        },
+        {
+          "criterion": "Clarity",
+          "score": 9,
+          "outOf": 10
+        }
+      ]
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      pm.test("Scheme switched to percentage", function () { pm.expect(pm.response.json().scheme).to.eql("percentage"); });
+    language: text/javascript
+order: 14000

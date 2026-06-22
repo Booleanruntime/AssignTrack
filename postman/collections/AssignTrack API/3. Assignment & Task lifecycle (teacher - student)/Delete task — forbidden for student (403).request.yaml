@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/tasks/{{taskId}}"
+method: DELETE
+headers:
+  Authorization: Bearer {{studentToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 403", function () { pm.response.to.have.status(403); });
+      pm.test("Returns the expected message", function () { pm.expect(pm.response.json().message).to.include("managed by your teacher"); });
+    language: text/javascript
+order: 18000

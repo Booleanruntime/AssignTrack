@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Duplicate User",
+      "email": "admin@gmail.com",
+      "password": "123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 400", function () { pm.response.to.have.status(400); });
+      pm.test("Returns the expected message", function () { pm.expect(pm.response.json().message).to.include("User already exists"); });
+    language: text/javascript
+order: 6000

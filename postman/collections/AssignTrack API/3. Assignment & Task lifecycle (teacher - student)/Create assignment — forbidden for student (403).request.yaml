@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{baseUrl}}/assignments"
+method: POST
+headers:
+  Authorization: Bearer {{studentToken}}
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "Should Fail",
+      "description": "Students cannot author assignments.",
+      "deadline": "2027-06-30T23:59:59.000Z",
+      "subject": "{{seedSubjectId}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 403", function () { pm.response.to.have.status(403); });
+      pm.test("Returns the expected message", function () { pm.expect(pm.response.json().message).to.include("Only teachers can create assignments"); });
+    language: text/javascript
+order: 4000

@@ -1,0 +1,3 @@
+$kind: collection
+description: "Login for each role (tokens are captured into collection variables), plus auth-failure cases: bad password, duplicate registration, invalid role, missing token and role-based 403s."
+order: 1000

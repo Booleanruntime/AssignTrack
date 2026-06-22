@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "admin@gmail.com",
+      "password": "123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      var b = pm.response.json();
+      pm.test("Returns a JWT token", function () { pm.expect(b).to.have.property("token"); });
+      pm.test("Role is admin", function () { pm.expect(b.role).to.eql("admin"); });
+      pm.collectionVariables.set("adminToken", b.token);
+      pm.collectionVariables.set("adminId", b.id);
+    language: text/javascript
+order: 2000

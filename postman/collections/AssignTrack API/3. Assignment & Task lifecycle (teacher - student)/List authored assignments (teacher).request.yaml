@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/assignments"
+method: GET
+headers:
+  Authorization: Bearer {{teacherToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      var a = pm.response.json();
+      pm.test("Returns an array", function () { pm.expect(a).to.be.an("array"); });
+      pm.test("Includes the new assignment", function () { pm.expect(a.some(function (x) { return x._id === pm.collectionVariables.get("assignmentId"); })).to.be.true; });
+    language: text/javascript
+order: 2000

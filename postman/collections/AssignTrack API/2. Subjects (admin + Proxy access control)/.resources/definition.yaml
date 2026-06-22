@@ -1,0 +1,3 @@
+$kind: collection
+description: Admin CRUD over subjects and the Proxy-guarded teacher/student assignment endpoints. A throwaway subject is created and deleted so the run is self-cleaning.
+order: 2000

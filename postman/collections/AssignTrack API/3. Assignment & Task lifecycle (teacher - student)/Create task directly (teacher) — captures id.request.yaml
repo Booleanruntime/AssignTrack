@@ -1,0 +1,26 @@
+$kind: http-request
+url: "{{baseUrl}}/tasks"
+method: POST
+headers:
+  Authorization: Bearer {{teacherToken}}
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "Postman Direct Task",
+      "description": "Temporary task created directly by Postman.",
+      "deadline": "2027-06-30T23:59:59.000Z",
+      "subject": "{{seedSubjectId}}",
+      "status": "Not Started",
+      "priority": "Medium"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201", function () { pm.response.to.have.status(201); });
+      var b = pm.response.json();
+      pm.test("Returns the created task id", function () { pm.expect(b).to.have.property("_id"); });
+      pm.collectionVariables.set("tempTaskId", b._id);
+    language: text/javascript
+order: 17000
