@@ -9,7 +9,7 @@ const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
 const { markOverdueTasks } = require('../services/OverdueTaskService');
 const ArchiveAssignmentCommand = require('../commands/ArchiveAssignmentCommand');
 const RestoreAssignmentCommand = require('../commands/RestoreAssignmentCommand');
-const ActivityLogService = require('../services/ActivityLogService');
+const eventBus = require('../events/appEventBus');
 
 router.get('/', protect, async (req, res) => {
   try {
@@ -87,7 +87,7 @@ router.put('/:id/submit', protect, async (req, res) => {
     const saved = await task.save();
     const populated = await saved.populate('subject');
 
-    await ActivityLogService.recordActivity({
+    await eventBus.emit('activity.recorded', {
       actor: req.user._id,
       action: 'task.submitted',
       entityType: 'Task',
@@ -115,7 +115,7 @@ router.put('/:id/archive', protect, async (req, res) => {
       return res.status(404).json({ message: 'Task not found' });
     }
 
-    await ActivityLogService.recordActivity({
+    await eventBus.emit('activity.recorded', {
       actor: req.user._id,
       action: 'task.archived',
       entityType: 'Task',
@@ -142,7 +142,7 @@ router.put('/:id/restore', protect, async (req, res) => {
       return res.status(404).json({ message: 'Task not found' });
     }
 
-    await ActivityLogService.recordActivity({
+    await eventBus.emit('activity.recorded', {
       actor: req.user._id,
       action: 'task.restored',
       entityType: 'Task',
@@ -194,7 +194,7 @@ router.put('/:id', protect, async (req, res) => {
       return res.status(404).json({ message: 'Task not found' });
     }
 
-    await ActivityLogService.recordActivity({
+    await eventBus.emit('activity.recorded', {
       actor: req.user._id,
       action: 'task.updated',
       entityType: 'Task',
@@ -229,7 +229,7 @@ router.delete('/:id', protect, async (req, res) => {
       return res.status(404).json({ message: 'Task not found' });
     }
 
-    await ActivityLogService.recordActivity({
+    await eventBus.emit('activity.recorded', {
       actor: req.user._id,
       action: 'task.deleted',
       entityType: 'Task',

@@ -2,8 +2,7 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const Grade = require('../models/Grade');
 const Task = require('../models/Task');
-const NotificationService = require('../services/NotificationService');
-const ActivityLogService = require('../services/ActivityLogService');
+const eventBus = require('../events/appEventBus');
 const { createGrade } = require('../controllers/gradeController');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
 
@@ -37,25 +36,24 @@ describe('createGrade submission gate', () => {
         const task = { _id: 'task1', user: 'student1', subject: 'subj1', status: ASSIGNMENT_STATUSES.SUBMITTED, save: sinon.stub().resolves() };
         sinon.stub(Task, 'findById').resolves(task);
         const gradeCreate = sinon.stub(Grade, 'create').resolves({ _id: 'grade1', label: '80%' });
-        const notification = sinon.stub(NotificationService, 'createNotification').resolves({ _id: 'n1' });
-        const activity = sinon.stub(ActivityLogService, 'recordActivity').resolves();
+        const emit = sinon.stub(eventBus, 'emit').resolves([]);
         const res = makeRes();
 
         await createGrade({ user: teacher, body: validBody }, res);
 
         expect(gradeCreate.calledOnce).to.equal(true);
 
-        expect(notification.calledOnce).to.equal(true);
-        expect(notification.firstCall.args[0]).to.include({
-            recipient: 'student1',
-            type: 'grade.created',
-            title: 'Grade posted',
-            task: 'task1',
-            grade: 'grade1',
+        expect(emit.calledTwice).to.equal(true);
+        expect(emit.firstCall.args[0]).to.equal('grade.created');
+        expect(emit.firstCall.args[1]).to.deep.include({
+            grade: { _id: 'grade1', label: '80%' },
+            task,
+            label: '80%',
+            score: 80,
         });
 
-        expect(activity.calledOnce).to.equal(true);
-        expect(activity.firstCall.args[0]).to.include({
+        expect(emit.secondCall.args[0]).to.equal('activity.recorded');
+        expect(emit.secondCall.args[1]).to.include({
             actor: teacher._id,
             action: 'grade.created',
             entityType: 'Grade',

@@ -3,8 +3,7 @@ const sinon = require('sinon');
 const Assignment = require('../models/Assignment');
 const Task = require('../models/Task');
 const Subject = require('../models/Subject');
-const NotificationService = require('../services/NotificationService');
-const ActivityLogService = require('../services/ActivityLogService');
+const eventBus = require('../events/appEventBus');
 const { createAssignment, instancesFor } = require('../controllers/assignmentController');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
 
@@ -42,8 +41,7 @@ describe('Assignment fan-out', () => {
             { _id: 'task2', user: 's2' },
         ]);
 
-        const notifications = sinon.stub(NotificationService, 'createMany').resolves([]);
-        const activity = sinon.stub(ActivityLogService, 'recordActivity').resolves();
+        const emit = sinon.stub(eventBus, 'emit').resolves([]);
         const res = makeRes();
 
         await createAssignment({ user: teacher, body }, res);
@@ -51,18 +49,18 @@ describe('Assignment fan-out', () => {
         expect(insert.calledOnce).to.equal(true);
         expect(insert.firstCall.args[0]).to.have.length(2);
 
-        expect(notifications.calledOnce).to.equal(true);
-        expect(notifications.firstCall.args[0]).to.have.length(2);
-        expect(notifications.firstCall.args[0][0]).to.include({
-            recipient: 's1',
-            type: 'assignment.created',
-            title: 'New assignment',
-            assignment: 'a1',
-            task: 'task1',
+        expect(emit.calledTwice).to.equal(true);
+        expect(emit.firstCall.args[0]).to.equal('assignment.created');
+        expect(emit.firstCall.args[1]).to.deep.include({
+            subject: { _id: 'subj1', teachers: ['teacher1'], students: ['s1', 's2'] },
         });
+        expect(emit.firstCall.args[1].tasks).to.deep.equal([
+            { _id: 'task1', user: 's1' },
+            { _id: 'task2', user: 's2' },
+        ]);
 
-        expect(activity.calledOnce).to.equal(true);
-        expect(activity.firstCall.args[0]).to.include({
+        expect(emit.secondCall.args[0]).to.equal('activity.recorded');
+        expect(emit.secondCall.args[1]).to.include({
             actor: teacher._id,
             action: 'assignment.created',
             entityType: 'Assignment',
@@ -138,8 +136,7 @@ describe('Assignment fan-out', () => {
         { _id: 'task2', user: 's2' },
     ]);
 
-    sinon.stub(NotificationService, 'createMany').resolves([]);
-    sinon.stub(ActivityLogService, 'recordActivity').resolves();
+    sinon.stub(eventBus, 'emit').resolves([]);
 
     const res = makeRes();
 

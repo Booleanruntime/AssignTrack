@@ -7,8 +7,7 @@ const FeedbackBuilder = require('../builders/FeedbackBuilder');
 const computeOverall = require('../utils/computeOverall');
 const { getAssignmentState } = require('../states/AssignmentState');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
-const NotificationService = require('../services/NotificationService');
-const ActivityLogService = require('../services/ActivityLogService');
+const eventBus = require('../events/appEventBus');
 
 const logger = Logger.getInstance();
 
@@ -64,21 +63,14 @@ const createGrade = async (req, res) => {
         // sees it as marked
         task.status = ASSIGNMENT_STATUSES.GRADED;
         await task.save();
-        await NotificationService.createNotification({
-            recipient: task.user,
-            type: 'grade.created',
-            title: 'Grade posted',
-            message: `Your assignment has been graded: ${label}`,
-            task: task._id,
-            grade: grade._id,
-            metadata: {
-                subject: task.subject,
-                score,
-                label,
-            },
+        await eventBus.emit('grade.created', {
+            grade,
+            task,
+            label,
+            score,
         });
 
-        await ActivityLogService.recordActivity({
+        await eventBus.emit('activity.recorded', {
             actor: req.user._id,
             action: 'grade.created',
             entityType: 'Grade',
@@ -145,7 +137,7 @@ const updateGrade = async (req, res) => {
         grade.feedback = buildFeedback(req.body);
 
         const updated = await grade.save();
-        await ActivityLogService.recordActivity({
+        await eventBus.emit('activity.recorded', {
             actor: req.user._id,
             action: 'grade.updated',
             entityType: 'Grade',
