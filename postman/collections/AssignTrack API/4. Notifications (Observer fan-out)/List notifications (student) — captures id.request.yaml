@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/notifications"
+method: GET
+headers:
+  Authorization: Bearer {{studentToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      var n = pm.response.json();
+      pm.test("Notifications returned as an array", function () { pm.expect(n).to.be.an("array"); });
+      if (n.length) pm.collectionVariables.set("notifId", n[0]._id);
+    language: text/javascript
+order: 1000

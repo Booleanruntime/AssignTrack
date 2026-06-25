@@ -1,0 +1,26 @@
+$kind: http-request
+url: "{{baseUrl}}/assignments"
+method: POST
+headers:
+  Authorization: Bearer {{teacherToken}}
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "Postman API Test Assignment",
+      "description": "Created via Postman to exercise the assignment fan-out.",
+      "deadline": "2027-06-30T23:59:59.000Z",
+      "subject": "{{seedSubjectId}}",
+      "assignmentType": "standard"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201", function () { pm.response.to.have.status(201); });
+      var b = pm.response.json();
+      pm.test("Returns the created assignment id", function () { pm.expect(b).to.have.property("_id"); });
+      pm.test("Fanned out to at least one student", function () { pm.expect(b.assignedTo).to.be.above(0); });
+      pm.collectionVariables.set("assignmentId", b._id);
+    language: text/javascript
+order: 1000

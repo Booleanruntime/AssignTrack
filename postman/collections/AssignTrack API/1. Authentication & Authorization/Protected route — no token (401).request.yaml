@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{baseUrl}}/tasks"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 401", function () { pm.response.to.have.status(401); });
+      pm.test("Returns the expected message", function () { pm.expect(pm.response.json().message).to.include("Not authorized, no token"); });
+    language: text/javascript
+order: 12000

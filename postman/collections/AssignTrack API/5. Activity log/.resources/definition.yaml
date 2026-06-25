@@ -1,0 +1,3 @@
+$kind: collection
+description: Central activity feed, plus an unauthenticated 401 case.
+order: 5000

@@ -1,0 +1,4 @@
+name: AssignTrack (Live EC2)
+values:
+  - key: baseUrl
+    value: 'http://13.211.223.217/api'

@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/subjects/000000000000000000000000"
+method: DELETE
+headers:
+  Authorization: Bearer {{adminToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 404", function () { pm.response.to.have.status(404); });
+      pm.test("Returns the expected message", function () { pm.expect(pm.response.json().message).to.include("Subject not found"); });
+    language: text/javascript
+order: 7000

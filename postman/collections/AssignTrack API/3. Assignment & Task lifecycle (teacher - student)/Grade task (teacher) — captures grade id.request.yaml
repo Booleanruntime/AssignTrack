@@ -1,0 +1,43 @@
+$kind: http-request
+url: "{{baseUrl}}/grades"
+method: POST
+headers:
+  Authorization: Bearer {{teacherToken}}
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "taskId": "{{taskId}}",
+      "scheme": "letter",
+      "summary": "Strong submission overall.",
+      "strengths": [
+        "Clear structure",
+        "Good worked examples"
+      ],
+      "improvements": [
+        "Add APA citations"
+      ],
+      "rubric": [
+        {
+          "criterion": "Correctness",
+          "score": 18,
+          "outOf": 20
+        },
+        {
+          "criterion": "Clarity",
+          "score": 9,
+          "outOf": 10
+        }
+      ]
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201", function () { pm.response.to.have.status(201); });
+      var b = pm.response.json();
+      pm.test("Returns a grade with a label", function () { pm.expect(b).to.have.property("label"); });
+      pm.test("Marked as passed", function () { pm.expect(b.passed).to.be.true; });
+      pm.collectionVariables.set("gradeId", b._id);
+    language: text/javascript
+order: 12000

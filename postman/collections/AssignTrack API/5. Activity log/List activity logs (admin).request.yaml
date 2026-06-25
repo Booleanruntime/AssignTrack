@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/activity-logs"
+method: GET
+headers:
+  Authorization: Bearer {{adminToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      pm.test("Returns an array of log entries", function () { pm.expect(pm.response.json()).to.be.an("array"); });
+    language: text/javascript
+order: 1000

@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/subjects/{{tempSubjectId}}/students"
+method: PUT
+headers:
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "studentIds": [
+        "{{studentId}}"
+      ]
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      pm.test("Student enrolled in subject", function () { var ids = pm.response.json().students.map(function (s) { return s._id || s; }); pm.expect(ids).to.include(pm.collectionVariables.get("studentId")); });
+    language: text/javascript
+order: 4000

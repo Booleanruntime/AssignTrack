@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{baseUrl}}/tasks/{{taskId}}"
+method: PUT
+headers:
+  Authorization: Bearer {{studentToken}}
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "status": "In Progress",
+      "priority": "High"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      var b = pm.response.json();
+      pm.test("Status moved to In Progress", function () { pm.expect(b.status).to.eql("In Progress"); });
+      pm.test("Priority set to High", function () { pm.expect(b.priority).to.eql("High"); });
+    language: text/javascript
+order: 6000

@@ -1,0 +1,24 @@
+$kind: collection
+description: |-
+  API test collection for AssignTrack (IFQ636 Assignment 2).
+
+  Covers every backend endpoint with happy-path and error-handling cases (401 / 403 / 404 / 400). Run top-to-bottom in the Collection Runner: the three Login requests capture JWT tokens into collection variables, and later requests chain the created subject/assignment/task/grade ids automatically.
+
+  The run is self-cleaning - the temporary subject, assignment and direct task it creates are deleted again at the end.
+
+  Set the `baseUrl` variable (or import an environment) to point at the live server (http://13.211.223.217/api) or a local backend (http://localhost:5001/api).
+variables:
+  baseUrl: http://13.211.223.217/api
+  adminToken: ""
+  teacherToken: ""
+  studentToken: ""
+  adminId: ""
+  teacherId: ""
+  studentId: ""
+  seedSubjectId: ""
+  tempSubjectId: ""
+  assignmentId: ""
+  taskId: ""
+  tempTaskId: ""
+  gradeId: ""
+  notifId: ""

@@ -1,0 +1,3 @@
+$kind: collection
+description: The student lists notifications raised by the assignment/grade fan-out and marks them read.
+order: 4000

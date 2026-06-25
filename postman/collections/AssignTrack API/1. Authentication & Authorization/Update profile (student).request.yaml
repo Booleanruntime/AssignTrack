@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/profile"
+method: PUT
+headers:
+  Authorization: Bearer {{studentToken}}
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "university": "Queensland University of Technology",
+      "address": "Brisbane, QLD"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      pm.test("Returns a refreshed token", function () { pm.expect(pm.response.json()).to.have.property("token"); });
+    language: text/javascript
+order: 9000

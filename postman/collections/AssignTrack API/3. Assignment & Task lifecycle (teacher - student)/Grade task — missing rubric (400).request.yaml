@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/grades"
+method: POST
+headers:
+  Authorization: Bearer {{teacherToken}}
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "taskId": "{{taskId}}",
+      "scheme": "letter"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 400", function () { pm.response.to.have.status(400); });
+      pm.test("Returns the expected message", function () { pm.expect(pm.response.json().message).to.include("rubric"); });
+    language: text/javascript
+order: 11000

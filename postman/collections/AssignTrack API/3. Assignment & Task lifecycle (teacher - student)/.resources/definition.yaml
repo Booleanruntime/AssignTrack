@@ -1,0 +1,4 @@
+$kind: collection
+name: 3. Assignment & Task lifecycle (teacher -> student)
+description: "End-to-end flow: a teacher authors an assignment that fans out to the enrolled student, the student updates/submits it, the teacher grades it, then the assignment is deleted to clean up."
+order: 3000

@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/notifications/read-all"
+method: PUT
+headers:
+  Authorization: Bearer {{studentToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      pm.test("Returns a modified count", function () { pm.expect(pm.response.json()).to.have.property("modifiedCount"); });
+    language: text/javascript
+order: 3000
