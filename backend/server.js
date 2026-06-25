@@ -3,11 +3,14 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const eventBus = require('./events/appEventBus');
+const registerSubscribers = require('./events/registerSubscribers');
 
 dotenv.config();
 
 
 const app = express();
+registerSubscribers(eventBus);
 
 app.use(cors());
 app.use(express.json());

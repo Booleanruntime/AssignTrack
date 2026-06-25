@@ -1,6 +1,6 @@
 const Task = require('../models/Task');
 const { ASSIGNMENT_STATUSES } = require('../constants/assignmentStatuses');
-const NotificationService = require('./NotificationService');
+const eventBus = require('../events/appEventBus');
 
 const OVERDUE_ELIGIBLE_STATUSES = [
   ASSIGNMENT_STATUSES.NOT_STARTED,
@@ -28,18 +28,7 @@ async function markOverdueTasks({ userId, now = new Date() } = {}) {
     { status: ASSIGNMENT_STATUSES.OVERDUE }
   );
 
-  await NotificationService.createMany(overdueTasks.map((task) => ({
-    recipient: task.user,
-    type: 'task.overdue',
-    title: 'Assignment overdue',
-    message: `"${task.title}" is now overdue.`,
-    task: task._id,
-    assignment: task.assignment,
-    metadata: {
-      subject: task.subject,
-      deadline: task.deadline,
-    },
-  })));
+  await eventBus.emit('task.overdue', { tasks: overdueTasks });
 
   return { ...result, notifiedCount: overdueTasks.length };
 }
