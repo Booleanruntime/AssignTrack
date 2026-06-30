@@ -231,8 +231,8 @@ http://13.211.223.217/login
 | Role              | Email                                         | Password     |
 | ----------------- | --------------------------------------------- | ------------ |
 | **Administrator** | [admin@gmail.com](mailto:admin@gmail.com)     | 123          |
-| **Student**       | [Student@seed.test](mailto:Student@seed.test) | Password123! |
-| **Teacher**       | [Teacher@seed.test](mailto:Teacher@seed.test) | Password123! |
+| **Student**       | [student@seed.test](mailto:student@seed.test) | Password123! |
+| **Teacher**       | [teacher@seed.test](mailto:teacher@seed.test) | Password123! |
 
 ---
 
