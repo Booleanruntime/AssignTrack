@@ -1,130 +1,251 @@
 # AssignTrack
 
-## Project Overview
+A full-stack assignment management platform developed using the **MERN** stack as part of **IFQ636 – Software Lifecycle Management** at Queensland University of Technology (QUT).
 
-AssignTrack is a web-based assignment management system developed using React, Node.js, Express, and MongoDB.
-
-The system helps students organise and track assignments across multiple subjects while allowing administrators to manage subjects within the platform.
+AssignTrack streamlines the complete assignment lifecycle by enabling administrators to configure the system, teachers to create and grade assignments, and students to manage submissions and receive feedback through a single web application.
 
 ---
 
-## Features
+# Project Overview
 
-### Student Features
+Educational institutions often rely on multiple disconnected systems to manage subjects, assignments, enrolments and grading. This can create duplicated work, inconsistent processes and poor visibility for both staff and students.
 
-* Register and login
-* Create assignments
-* View assignments
-* Edit assignments
-* Delete assignments
-* Filter assignments by subject and status
-* Sort assignments by due date
-* Track assignment status
-
-### Admin Features
-
-* Create subjects
-* View subjects
-* Edit subjects
-* Delete subjects
+AssignTrack addresses this problem by providing a centralised assignment management platform built using the MERN technology stack. The system streamlines the complete assignment lifecycle by enabling administrators to configure the system, teachers to create and grade assignments, and students to manage submissions and receive feedback through a single platform. The system also supports automatic assignment distribution, rubric-based grading, notifications, activity logging and secure role-based access control.
 
 ---
 
-## Technology Stack
+# Key Features
 
-* React
-* Node.js
-* Express.js
-* MongoDB Atlas
-* Material UI
-* GitHub Actions
-* AWS EC2
-* Nginx
-* PM2
+## Administrator
+
+* Create teachers
+* Create and manage subjects
+* Allocate teachers to subjects
+* Enrol students into subjects
+
+## Teacher
+
+* Create assignments using reusable templates
+* Set assignment details and due dates
+* Automatically distribute assignments to enrolled students
+* Review student submissions
+* Grade assignments using rubrics
+* Provide structured feedback
+
+## Student
+
+* Register and log in securely
+* View assigned work
+* Track assignment progress
+* Search, sort and filter assignments
+* Submit assignments
+* View grades and feedback
+* Archive completed assignments
+
+## System
+
+* JWT authentication
+* Role-based access control
+* Automatic assignment distribution
+* Notifications
+* Activity logging
+* Assignment lifecycle management
 
 ---
 
-## Setup Instructions
+# Technology Stack
 
-### Backend
+| Category       | Technologies                                                             |
+| -------------- | ------------------------------------------------------------------------ |
+| **Frontend**   | React, React Router, Axios, Tailwind CSS                                 |
+| **Backend**    | Node.js, Express.js, MongoDB Atlas, Mongoose, JWT Authentication, bcrypt |
+| **Testing**    | Mocha, Chai, Sinon, Postman                                              |
+| **Deployment** | AWS EC2, Nginx, PM2, GitHub Actions                                      |
+
+---
+
+# System Architecture
+
+```text
+                Users
+                  │
+                  ▼
+          React Frontend
+                  │
+          Axios REST API
+                  │
+                  ▼
+          Express Backend
+                  │
+      Business Logic & Services
+                  │
+                  ▼
+          MongoDB Atlas
+```
+
+---
+
+# Git Branching Strategy
+
+| Branch        | Purpose                                   |
+| ------------- | ----------------------------------------- |
+| **feature/*** | Individual feature development            |
+| **develop**   | Integration branch for completed features |
+| **main**      | Stable production-ready branch            |
+
+---
+
+# Repository Structure
+
+```text
+AssignTrack
+│
+├── .github/
+│
+├── backend/
+│   ├── builders/
+│   ├── commands/
+│   ├── config/
+│   ├── constants/
+│   ├── controllers/
+│   ├── events/
+│   ├── factories/
+│   ├── middleware/
+│   ├── models/
+│   ├── proxies/
+│   ├── routes/
+│   ├── services/
+│   ├── states/
+│   ├── strategies/
+│   ├── test/
+│   ├── utils/
+│   ├── server.js
+│   └── seed.js
+│
+├── frontend/
+│   ├── public/
+│   └── src/
+│       ├── assets/
+│       ├── components/
+│       ├── constants/
+│       ├── context/
+│       ├── pages/
+│       ├── utils/
+│       ├── App.js
+│       └── index.js
+│
+├── CHANGELOG.md
+└── README.md
+```
+
+---
+
+# Installation
+
+## 1. Clone the Repository
+
+```bash
+git clone https://github.com/Booleanruntime/AssignTrack.git
+
+cd AssignTrack
+```
+
+## 2. Install Backend Dependencies
 
 ```bash
 cd backend
+
 npm install
+```
+
+## 3. Install Frontend Dependencies
+
+```bash
+cd ../frontend
+
+npm install
+```
+
+---
+
+# Environment Variables
+
+Create a `.env` file inside the **backend** directory.
+
+```env
+MONGO_URI=
+JWT_SECRET=
+PORT=
+```
+
+---
+
+# Running the Application
+
+## Start the Backend
+
+```bash
+cd backend
+
 npm run dev
 ```
 
-### Frontend
+## Start the Frontend
 
 ```bash
 cd frontend
-npm install
+
 npm start
 ```
 
-### Run Tests
+---
+
+# Testing
+
+## Backend Unit Tests
 
 ```bash
 cd backend
+
 npm test
 ```
 
 ---
 
-## GitHub Repository
+# Continuous Integration (CI/CD)
 
-https://github.com/ola-abdelrazzak/AssignTrack
-
----
-
-## AWS EC2 Instance
-
-Instance Name: AssignTrack
-
-Instance ID: i-08c78e1a2b7e89fd4
-
-If the EC2 instance is stopped:
-
-1. Open the AWS EC2 Console.
-2. Locate the instance above.
-3. Start the instance.
-4. Copy the current Public IPv4 address.
-5. Access the application using the current public IP address.
+GitHub Actions automates the build and testing process. Each push to the repository triggers the CI workflow to help ensure code quality before deployment.
 
 ---
 
-## Public URL
-
-Current URL: http://13.211.223.217/login
-
-**Note:** The EC2 public IP may change if the instance is stopped and restarted in the AWS teaching environment.
-
-After restarting the instance, obtain the new Public IPv4 address from the AWS EC2 console and access the application using:
+# Public URL
 
 ```text
-http://<new-public-ip>
+http://13.211.223.217/login
 ```
 
-No code changes are required because the frontend uses relative API paths (`/api`) and Nginx proxies API requests internally to the backend running on port 5001.
+---
+
+# Default Test Accounts
+
+| Role              | Email                                         | Password     |
+| ----------------- | --------------------------------------------- | ------------ |
+| **Administrator** | [admin@gmail.com](mailto:admin@gmail.com)     | 123          |
+| **Student**       | [Student@seed.test](mailto:Student@seed.test) | Password123! |
+| **Teacher**       | [Teacher@seed.test](mailto:Teacher@seed.test) | Password123! |
 
 ---
 
-## Test Credentials
+# Repository
 
-### Admin
+GitHub Repository:
 
-Email: [admin@gmail.com]
-
-Password: 123
-
-### Student
-
-Email: [john.smith@gmail.com]
-
-Password: 123
+https://github.com/Booleanruntime/AssignTrack
 
 ---
 
-## Author
+# Contributors
 
-Ola Abdelrazzak
+* Avi Chand
+* Nathan King
+* Ola Abdelrazzak
